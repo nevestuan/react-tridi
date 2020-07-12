@@ -1,7 +1,7 @@
-import { ExampleComponent } from '.'
+import Tridi from '.';
 
-describe('ExampleComponent', () => {
-  it('is truthy', () => {
-    expect(ExampleComponent).toBeTruthy()
-  })
-})
+describe('Tridi', () => {
+	it('is truthy', () => {
+		expect(Tridi).toBeTruthy();
+	});
+});
