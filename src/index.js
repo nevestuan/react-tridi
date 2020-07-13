@@ -85,14 +85,14 @@ const Tridi = forwardRef(
 		};
 
 		const nextFrame = () => {
-			const newIndex = currentImageIndex <= 0 ? _count - 1 : currentImageIndex - 1;
+			const newIndex = currentImageIndex >= _count - 1 ? 0 : currentImageIndex + 1;
 			setCurrentImageIndex(newIndex);
 			onNextFrame();
 			onFrameChange(newIndex);
 		};
 
 		const prevFrame = () => {
-			const newIndex = currentImageIndex >= _count - 1 ? 0 : currentImageIndex + 1;
+			const newIndex = currentImageIndex <= 0 ? _count - 1 : currentImageIndex - 1;
 			setCurrentImageIndex(newIndex);
 			onPrevFrame();
 			onFrameChange(newIndex);
@@ -252,8 +252,11 @@ const Tridi = forwardRef(
 				<img
 					key={index}
 					src={src}
-					className={`${styles['tridi-viewer-image']}`}
-					style={{ display: currentImageIndex === index ? 'block' : 'none' }}
+					className={`${styles['tridi-viewer-image']} ${
+						currentImageIndex === index
+							? styles['tridi-viewer-image-shown']
+							: styles['tridi-viewer-image-hidden']
+					}`}
 					alt=""
 				/>
 			));

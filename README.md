@@ -54,6 +54,7 @@ const Example = () => (
 | touchDragInterval | `number` | `2` | no | Adjust rotation speed for touch events
 | mouseleaveDetect | `boolean` | `false` | no | If true, active drag event will stop whenever mouse cursor leaves Tridi container
 
+
 ## Prop Events
 | Prop Name | Params Type | Description |
 | --------- | ------ | ----------- |
@@ -68,12 +69,14 @@ const Example = () => (
 | onDragEnd | `null` | Image rotation sequence (dragging) ends
 | onFrameChange | `number` | Next image is loaded, sending out the current image index
 
+
 ## Ref Functions
 | Function Name | Params Type | Description |
 | ------------- | ----------- | ----------- |
 | prev() | `null` | trigger prev move
 | next() | `null` | trigger next move
 | toggleAutoPlay(true/false) | `boolean` | toogle autoplay
+
 
 ## License
 

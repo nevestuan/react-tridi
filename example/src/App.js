@@ -62,6 +62,7 @@ const App = () => {
 				autoplaySpeed={70}
 				onAutoplayStart={() => setIsAutoPlayRunning(true)}
 				onAutoplayStop={() => setIsAutoPlayRunning(false)}
+				inverse
 			/>
 			<div className="dot" style={dotPosition[currentFrameIndex]}></div>
 			<button onClick={() => tridiRef.current.prev()}>Prev</button>
