@@ -44,7 +44,6 @@ const Tridi = forwardRef(
 			draggable,
 			hintOnStartup,
 			hintText,
-			lazy,
 			autoplay,
 			autoplaySpeed,
 			stopAutoplayOnClick,
@@ -277,7 +276,6 @@ const Tridi = forwardRef(
 			if (touch) classNameStr += ' ' + styles['tridi-touch-true'];
 			if (mousewheel) classNameStr += ' ' + styles['tridi-mousewheel-true'];
 			if (hintOnStartup) classNameStr += ' ' + styles['tridi-hintOnStartup-true'];
-			if (lazy) classNameStr += ' ' + styles['tridi-lazy-true'];
 			if (className) classNameStr += ' ' + className;
 			return classNameStr;
 		};
@@ -313,7 +311,6 @@ Tridi.propTypes = {
 	draggable: PropTypes.bool,
 	hintOnStartup: PropTypes.bool,
 	hintText: PropTypes.string,
-	lazy: PropTypes.bool,
 	autoplay: PropTypes.bool,
 	autoplaySpeed: PropTypes.number,
 	stopAutoplayOnClick: PropTypes.bool,
@@ -348,7 +345,6 @@ Tridi.defaultProps = {
 	draggable: true,
 	hintOnStartup: false,
 	hintText: null,
-	lazy: false,
 	autoplay: false,
 	autoplaySpeed: 50,
 	stopAutoplayOnClick: false,

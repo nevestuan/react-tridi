@@ -30,6 +30,51 @@ const Example = () => (
 );
 ```
 
+## Props
+| Prop Name        | Prop Type           | Default Value  | Required? | Description |
+| ---------------- |:-------------------:|:--------------:|:---------:| ----------- |
+| className | `string` | `undefined` | no | Add class name for the component
+| style | `object` | `undefined` | no | Add style for the component
+| images | `arrays` | `"numbered"` | no | Source of images to be used by Tridi
+| format | `string` | `undefined` | yes* | Image extension (e.g. "jpg"). Required if images = "numbered"
+| location | `string` | `undefined` | yes* | Path to images folder. Required if images = "numbered"
+| count | `number` | `undefined` | yes* | Number of images in the series. Required if images = "numbered"
+| draggable | `boolean` | `true` | no | Enable/disable mouse drag event
+| hintOnStartUp | `boolean` | `false` | no | Enable/disable hint on start up
+| hintText | `string` | `undefined` | no | Enable/disable hint text
+| autoplay | `boolean` | `false` | no | Enable/disable autoplay
+| autoplaySpeed | `number` | `50` | no | Adjust autoplay speed
+| stopAutoplayOnClick | `boolean` | `false` | no | Stop autoplay if user clicks on container
+| stopAutoplayOnMouseEnter | `boolean` | `false` | no | Stop autoplay if user hovers over container
+| resumeAutoplayOnMouseLeave | `boolean` | `false` | no | Resume autoplay if user moves mouse cursor away from container
+| touch | `boolean` | `true` | no | Enable/disable touch support
+| mousewheel | `boolean` | `false` | no | Enable/disable mousewheel support
+| inverse | `boolean` | `false` | no | Swap image rotation direction. Affects mouse drag, mousewheel and touch
+| dragInterval | `number` | `1` | no | Adjust rotation speed for mouse drag events
+| touchDragInterval | `number` | `2` | no | Adjust rotation speed for touch events
+| mouseleaveDetect | `boolean` | `false` | no | If true, active drag event will stop whenever mouse cursor leaves Tridi container
+
+## Prop Events
+| Prop Name | Params Type | Description |
+| --------- | ------ | ----------- |
+| onHintHide | `null` | Hint is hidden
+| onAutoplayStart | `null` | Autoplay is started
+| onAutoplayStop | `null` | Autoplay is stopped
+| onNextMove | `null` | Next image is loaded (obeying inverse option)
+| onPrevMove | `null` | Previous image is loaded (obeying inverse option)
+| onNextFrame | `null` | Next image is loaded following the order in the image source (indifferent to inverse option)
+| onPrevFrame | `null` | Previous image is loaded according to the order in the image source (indifferent to inverse option)
+| onDragStart | `null` | Image rotation sequence (dragging) starts
+| onDragEnd | `null` | Image rotation sequence (dragging) ends
+| onFrameChange | `number` | Next image is loaded, sending out the current image index
+
+## Ref Functions
+| Function Name | Params Type | Description |
+| ------------- | ----------- | ----------- |
+| prev() | `null` | trigger prev move
+| next() | `null` | trigger next move
+| toggleAutoPlay(true/false) | `boolean` | toogle autoplay
+
 ## License
 
 MIT © [nevestuan](https://github.com/nevestuan)
