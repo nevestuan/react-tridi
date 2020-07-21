@@ -3,6 +3,10 @@
 */
 
 .tridi-viewer {
+	overflow: hidden;
+	position: relative;
+	display: flex;
+	align-items: center;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
 	-moz-user-select: none;
@@ -15,11 +19,8 @@
 	cursor: grab;
 }
 
-.tridi-viewer {
-	overflow: hidden;
-	position: relative;
-	display: flex;
-	align-items: center;
+.tridi-recording-true {
+	cursor: cell !important;
 }
 
 .tridi-viewer-image {

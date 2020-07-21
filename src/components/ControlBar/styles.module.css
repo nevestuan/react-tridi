@@ -1,0 +1,21 @@
+.tridi-control-bar {
+	height: 40px;
+	width: 100%;
+	background-color: rgba(255, 255, 255, 0.2);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: absolute;
+	left: 0;
+	bottom: 0;
+}
+
+.tridi-control-button {
+	width: 40px;
+	height: 40px;
+	margin: 0 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+}
