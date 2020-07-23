@@ -4,16 +4,21 @@ import Tridi from 'react-tridi';
 import 'react-tridi/dist/index.css';
 
 const App = () => {
-	const [currentFrameIndex, setCurrentFrameIndex] = useState(0);
 	const [isAutoPlayRunning, setIsAutoPlayRunning] = useState(false);
 	const tridiRef = useRef(null);
 
 	const frameChangeHandler = (currentFrameIndex) => {
-		setCurrentFrameIndex(currentFrameIndex);
+		console.log('current frame index', currentFrameIndex);
 	};
 
+	const recordStartHandler = (pins) => console.log('on record start', pins);
+
+	const recordStopHandler = (pins) => console.log('on record stop', pins);
+
+	const pinClickHandler = (pin) => console.log('on pin click', pin);
+
 	return (
-		<div style={{ width: '500px', position: 'relative' }}>
+		<div style={{ width: '500px' }}>
 			<Tridi
 				ref={tridiRef}
 				location="./images"
@@ -23,6 +28,9 @@ const App = () => {
 				autoplaySpeed={70}
 				onAutoplayStart={() => setIsAutoPlayRunning(true)}
 				onAutoplayStop={() => setIsAutoPlayRunning(false)}
+				onRecordStart={recordStartHandler}
+				onRecordStop={recordStopHandler}
+				onPinClick={pinClickHandler}
 				inverse
 				showControlBar
 			/>

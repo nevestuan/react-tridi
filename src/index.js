@@ -63,6 +63,7 @@ const Tridi = forwardRef(
 			touchDragInterval,
 			mouseleaveDetect,
 			showControlBar,
+			renderPin,
 			onHintHide,
 			onAutoplayStart,
 			onAutoplayStop,
@@ -74,7 +75,8 @@ const Tridi = forwardRef(
 			onDragEnd,
 			onFrameChange,
 			onRecordStart,
-			onRecordStop
+			onRecordStop,
+			onPinClick
 		},
 		ref
 	) => {
@@ -90,6 +92,7 @@ const Tridi = forwardRef(
 		const _count = Array.isArray(images) ? images.length : Number(count);
 		const _images = TridiUtils.normalizedImages(images, format, location, _count);
 		const _viewerImageRef = useRef(null);
+		const _draggable = !isRecording && draggable;
 
 		const hideHint = () => {
 			setHintVisible(false);
@@ -165,7 +168,7 @@ const Tridi = forwardRef(
 
 		// handlers
 		const imageViewerMouseDownHandler = (e) => {
-			if (draggable) {
+			if (_draggable) {
 				if (e.preventDefault) e.preventDefault();
 				startDragging();
 				rotateViewerImage(e);
@@ -177,7 +180,7 @@ const Tridi = forwardRef(
 		};
 
 		const imageViewerMouseUpHandler = (e) => {
-			if (draggable) {
+			if (_draggable) {
 				if (e.preventDefault) e.preventDefault();
 				stopDragging();
 				resetMoveBuffer();
@@ -185,13 +188,13 @@ const Tridi = forwardRef(
 		};
 
 		const imageViewerMouseMoveHandler = (e) => {
-			if (draggable && isDragging) {
+			if (_draggable && isDragging) {
 				rotateViewerImage(e);
 			}
 		};
 
 		const imageViewerMouseLeaveHandler = () => {
-			if (draggable) resetMoveBuffer();
+			if (_draggable) resetMoveBuffer();
 			if (!isAutoPlayRunning && resumeAutoplayOnMouseLeave) {
 				toggleAutoplay(true);
 			}
@@ -255,15 +258,19 @@ const Tridi = forwardRef(
 				const pin = { id: TridiUtils.uid(), frameId: currentImageIndex, x, y };
 				const newPins = pins.concat(pin);
 				setPins(newPins);
-				console.log('newPins', newPins);
-				console.log('test', {
-					clientX,
-					clientY,
-					viewerWidth,
-					viewerHeight,
-					offsetLeft: e.offsetLeft,
-					offsetTop: e.offsetTop
-				});
+			}
+		};
+
+		const pinDoubleClickHandler = (pin) => {
+			if (isRecording) {
+				const newPins = pins.filter((item) => item.id !== pin.id);
+				setPins(newPins);
+			}
+		};
+
+		const pinClickHandler = (pin) => {
+			if (!isRecording) {
+				onPinClick(pin);
 			}
 		};
 
@@ -316,7 +323,7 @@ const Tridi = forwardRef(
 
 		const generateViewerClassName = () => {
 			let classNameStr = styles['tridi-viewer'];
-			if (draggable) classNameStr += ' ' + styles['tridi-draggable-true'];
+			if (_draggable) classNameStr += ' ' + styles['tridi-draggable-true'];
 			if (isRecording) classNameStr += ' ' + styles['tridi-recording-true'];
 			if (touch) classNameStr += ' ' + styles['tridi-touch-true'];
 			if (mousewheel) classNameStr += ' ' + styles['tridi-mousewheel-true'];
@@ -357,6 +364,9 @@ const Tridi = forwardRef(
 					viewerWidth={_viewerImageRef?.current?.clientWidth}
 					viewerHeight={_viewerImageRef?.current?.clientHeight}
 					currentFrameId={currentImageIndex}
+					onPinDoubleClick={pinDoubleClickHandler}
+					onPinClick={pinClickHandler}
+					renderPin={renderPin}
 				/>
 			</div>
 		);
@@ -367,6 +377,7 @@ Tridi.propTypes = {
 	className: PropTypes.string,
 	style: PropTypes.object,
 	images: PropTypes.oneOfType([PropTypes.array, PropTypes.string]),
+	pins: PropTypes.array,
 	format: PropTypes.string,
 	location: PropTypes.string,
 	count: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
@@ -386,6 +397,8 @@ Tridi.propTypes = {
 	mouseleaveDetect: PropTypes.bool,
 	showControlBar: PropTypes.bool,
 
+	renderPin: PropTypes.func,
+
 	onHintHide: PropTypes.func,
 	onAutoplayStart: PropTypes.func,
 	onAutoplayStop: PropTypes.func,
@@ -395,13 +408,17 @@ Tridi.propTypes = {
 	onPrevFrame: PropTypes.func,
 	onDragStart: PropTypes.func,
 	onDragEnd: PropTypes.func,
-	onFrameChange: PropTypes.func
+	onFrameChange: PropTypes.func,
+	onRecordStart: PropTypes.func,
+	onRecordStop: PropTypes.func,
+	onPinClick: PropTypes.func
 };
 
 Tridi.defaultProps = {
 	className: undefined,
 	style: undefined,
 	images: 'numbered',
+	pin: undefined,
 	format: undefined,
 	location: './images',
 	count: undefined,
@@ -421,6 +438,8 @@ Tridi.defaultProps = {
 	mouseleaveDetect: false,
 	showControlBar: false,
 
+	renderPin: undefined,
+
 	onHintHide: () => {},
 	onAutoplayStart: () => {},
 	onAutoplayStop: () => {},
@@ -432,7 +451,8 @@ Tridi.defaultProps = {
 	onDragEnd: () => {},
 	onFrameChange: () => {},
 	onRecordStart: () => {},
-	onRecordStop: () => {}
+	onRecordStop: () => {},
+	onPinClick: () => {}
 };
 
 export default Tridi;

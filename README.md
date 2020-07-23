@@ -1,12 +1,12 @@
 # react-tridi
 
-> React Tridi is a react component for 360-degree product viewer
+> React Tridi is a light-weight react component for 360-degree product viewer
 
 [![NPM](https://img.shields.io/npm/v/react-tridi.svg)](https://www.npmjs.com/package/react-tridi) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
 Inspired by the [Tridi](https://github.com/lukemnet/tridi) javascript library for 360-degree 3D product visualizations based on series of images. Special thanks to [Łukasz Wójcik](https://github.com/lwojcik)
 
-![](https://media.giphy.com/media/h7EVOL8vQwCtUo7hXV/giphy.gif)
+![](https://media.giphy.com/media/LmIKcYtsiw7igRYgCe/giphy.gif)
 
 ## Install
 
@@ -18,6 +18,10 @@ npm install --save react-tridi
 
 ## Usage
 
+#### Simple
+Here is the simplest case of using React Tridi. You just need to specify an images' location, its format, and total of the images.
+
+Sample code:
 ```jsx
 import React from 'react';
 import Tridi from 'react-tridi';
@@ -30,12 +34,89 @@ const Example = () => (
 );
 ```
 
+#### With Pins
+In this mode, you can load some pin points on top of the product images. There is an onClick event on each pin with the pin's information returned, so you can show the product information on that event if needed.
+
+The pins data structure looks like this:
+```
+const pins = [
+  { "id": "kcyvybbrjkr8lz7w1j", "frameId": 0, "x": "0.664000", "y": "0.570922" },
+  { "id": "kcyvybrdbqwmi3z1ig", "frameId": 1, "x": "0.340000", "y": "0.500000" },
+]
+```
+
+You can record pins' coordinates via the recoding mode of the React Tridi with the following steps:
+1. Enable the prop `showControlBar` to show functionality buttons. 
+2. Click the target icon to start recoding the coordinates. 
+3. Click on the image view area to create a pin. Double click the pin to remove it. You can click the Next & Prev button to move to other frames, and create other pins on them.
+3. On each start and stop recording event, an array of pins' information like above will be returned.
+
+You can also render a custom pin point if needed by using the `renderPin` prop.
+
+Sample code:
+```jsx
+import React from 'react';
+import Tridi from 'react-tridi';
+import 'react-tridi/dist/index.css';
+
+const Example = () => (
+    <div style={{ width: '500px' }}>
+      <Tridi
+        location="./images"
+        format="jpg"
+        count="36"
+        autoplaySpeed={70}
+        onRecordStart={recordStartHandler}
+        onRecordStop={recordStopHandler}
+        onPinClick={pinClickHandler}
+        renderPin={(pin) => (<span>A</span>)}
+        inverse
+        showControlBar
+      />
+    </div>
+);
+```
+
+#### With Customized Control Buttons
+
+If you do not like the default control buttons, React Tridi gives you a ref accessing to all the button actions.
+
+Sample code:
+```jsx
+import React, { useState, useRef } from 'react';
+import Tridi from 'react-tridi';
+import 'react-tridi/dist/index.css';
+
+const Example = () => {
+    const [isAutoPlayRunning, setIsAutoPlayRunning] = useState(false);
+  const tridiRef = useRef(null);
+  
+  return (
+    <div style={{ width: '500px' }}>
+      <Tridi
+        ref={tridiRef}
+        location="./images"
+        format="jpg"
+        count="36"
+      />
+      <button onClick={() => tridiRef.current.prev()}>Prev</button>
+      <button onClick={() => tridiRef.current.next()}>Next</button>
+      <button onClick={() => tridiRef.current.toggleAutoplay(!isAutoPlayRunning)}>
+        {isAutoPlayRunning ? 'Pause' : 'Autoplay'}
+      </button>
+    </div>
+  );
+};
+```
+
+
 ## Props
 | Prop Name        | Prop Type           | Default Value  | Required? | Description |
 | ---------------- |:-------------------:|:--------------:|:---------:| ----------- |
 | className | `string` | `undefined` | no | Add class name for the component
 | style | `object` | `undefined` | no | Add style for the component
 | images | `arrays` | `"numbered"` | no | Source of images to be used by Tridi
+| pins | `arrays` | `undefined` | no | Pin coordinates to show on the product
 | format | `string` | `undefined` | yes* | Image extension (e.g. "jpg"). Required if images = "numbered"
 | location | `string` | `undefined` | yes* | Path to images folder. Required if images = "numbered"
 | count | `number` | `undefined` | yes* | Number of images in the series. Required if images = "numbered"
@@ -53,6 +134,8 @@ const Example = () => (
 | dragInterval | `number` | `1` | no | Adjust rotation speed for mouse drag events
 | touchDragInterval | `number` | `2` | no | Adjust rotation speed for touch events
 | mouseleaveDetect | `boolean` | `false` | no | If true, active drag event will stop whenever mouse cursor leaves Tridi container
+| showControlBar | `boolean` | `false` | no | show a control bar with record, play, pause, next, prev functions
+| renderPin | `func` | `undefined` | no | render a customized pin point
 
 
 ## Prop Events
@@ -68,6 +151,9 @@ const Example = () => (
 | onDragStart | `null` | Image rotation sequence (dragging) starts
 | onDragEnd | `null` | Image rotation sequence (dragging) ends
 | onFrameChange | `number` | Next image is loaded, sending out the current image index
+| onRecordStart | `null` | return a current pins array on start recording
+| onRecordStop | `null` | return a current pins array on stop recording
+| onPinClick | `null` | return a pin info on click in normal mode
 
 
 ## Ref Functions
@@ -76,6 +162,7 @@ const Example = () => (
 | prev() | `null` | trigger prev move
 | next() | `null` | trigger next move
 | toggleAutoPlay(true/false) | `boolean` | toogle autoplay
+| toggleRecording(true/false) | `boolean` | toggle recording pins' coordinates
 
 
 ## License
