@@ -2,6 +2,7 @@
 
 > React Tridi is a light-weight react component for 360-degree product viewer
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/3ebf52d378154d4c8d4e8a84c3a2c7b3)](https://app.codacy.com/manual/nevestuan/react-tridi?utm_source=github.com&utm_medium=referral&utm_content=nevestuan/react-tridi&utm_campaign=Badge_Grade_Dashboard)
 [![NPM](https://img.shields.io/npm/v/react-tridi.svg)](https://www.npmjs.com/package/react-tridi) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
 Inspired by the [Tridi](https://github.com/lukemnet/tridi) javascript library for 360-degree 3D product visualizations based on series of images. Special thanks to [Łukasz Wójcik](https://github.com/lwojcik)
