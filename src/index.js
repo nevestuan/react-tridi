@@ -1,4 +1,11 @@
-import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import React, {
+	useState,
+	useEffect,
+	useRef,
+	forwardRef,
+	useImperativeHandle,
+	useCallback
+} from 'react';
 import PropTypes from 'prop-types';
 import styles from './styles.module.css';
 
@@ -80,7 +87,6 @@ const Tridi = forwardRef(
 		},
 		ref
 	) => {
-		if (!TridiUtils.isValidProps({ images, format, location })) return null;
 		const [moveBuffer, setMoveBuffer] = useState([]);
 		const [hintVisible, setHintVisible] = useState(hintOnStartup);
 		const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -99,67 +105,73 @@ const Tridi = forwardRef(
 			onHintHide();
 		};
 
-		const nextFrame = () => {
+		const nextFrame = useCallback(() => {
 			const newIndex = currentImageIndex >= _count - 1 ? 0 : currentImageIndex + 1;
 			setCurrentImageIndex(newIndex);
 			onNextFrame();
 			onFrameChange(newIndex);
-		};
+		}, [_count, currentImageIndex, onFrameChange, onNextFrame]);
 
-		const prevFrame = () => {
+		const prevFrame = useCallback(() => {
 			const newIndex = currentImageIndex <= 0 ? _count - 1 : currentImageIndex - 1;
 			setCurrentImageIndex(newIndex);
 			onPrevFrame();
 			onFrameChange(newIndex);
-		};
+		}, [_count, currentImageIndex, onFrameChange, onPrevFrame]);
 
-		const nextMove = () => {
+		const nextMove = useCallback(() => {
 			onNextMove();
 			return inverse ? prevFrame() : nextFrame();
-		};
+		}, [inverse, nextFrame, onNextMove, prevFrame]);
 
-		const prevMove = () => {
+		const prevMove = useCallback(() => {
 			onPrevMove();
 			return inverse ? nextFrame() : prevFrame();
-		};
+		}, [inverse, nextFrame, onPrevMove, prevFrame]);
 
-		const rotateViewerImage = (e) => {
-			const interval = e.touches ? touchDragInterval : dragInterval;
-			const eventX = e.touches ? e.touches[0].clientX : e.clientX;
-			const coord = eventX - _viewerImageRef.current.offsetLeft;
-			let newMoveBufffer = moveBuffer;
-			if (moveBuffer.length < 2) {
-				newMoveBufffer = moveBuffer.concat(coord);
-			} else {
-				newMoveBufffer = [moveBuffer[1], coord];
-			}
-			setMoveBuffer(newMoveBufffer);
-			const threshold = !(coord % interval);
-			const oldMove = newMoveBufffer[0];
-			const newMove = newMoveBufffer[1];
-			if (threshold && newMove < oldMove) {
-				nextMove();
-			} else if (threshold && newMove > oldMove) {
-				prevMove();
-			}
-		};
+		const rotateViewerImage = useCallback(
+			(e) => {
+				const interval = e.touches ? touchDragInterval : dragInterval;
+				const eventX = e.touches ? Math.round(e.touches[0].clientX) : e.clientX;
+				const coord = eventX - _viewerImageRef.current.offsetLeft;
+				let newMoveBufffer = moveBuffer;
+				if (moveBuffer.length < 2) {
+					newMoveBufffer = moveBuffer.concat(coord);
+				} else {
+					newMoveBufffer = [moveBuffer[1], coord];
+				}
+				setMoveBuffer(newMoveBufffer);
+				const threshold = !(coord % interval);
+				const oldMove = newMoveBufffer[0];
+				const newMove = newMoveBufffer[1];
+				if (threshold && newMove < oldMove) {
+					nextMove();
+				} else if (threshold && newMove > oldMove) {
+					prevMove();
+				}
+			},
+			[dragInterval, moveBuffer, nextMove, prevMove, touchDragInterval]
+		);
 
 		const resetMoveBuffer = () => setMoveBuffer([]);
 
-		const startDragging = () => {
+		const startDragging = useCallback(() => {
 			setIsDragging(true);
 			onDragStart();
-		};
+		}, [onDragStart]);
 
-		const stopDragging = () => {
+		const stopDragging = useCallback(() => {
 			setIsDragging(false);
 			onDragEnd();
-		};
+		}, [onDragEnd]);
 
-		const toggleAutoplay = (state) => {
-			setIsAutoPlayRunning(state);
-			return state ? onAutoplayStart() : onAutoplayStop();
-		};
+		const toggleAutoplay = useCallback(
+			(state) => {
+				setIsAutoPlayRunning(state);
+				return state ? onAutoplayStart() : onAutoplayStop();
+			},
+			[onAutoplayStart, onAutoplayStop]
+		);
 
 		const toggleRecording = (state) => {
 			setIsRecording(state);
@@ -210,42 +222,61 @@ const Tridi = forwardRef(
 			}
 		};
 
-		const imageViewerWheelHandler = (e) => {
-			if (mousewheel) {
-				if (e.preventDefault) e.preventDefault();
-				e.deltaY / 120 > 0 ? nextMove() : prevMove();
-			}
-		};
+		const imageViewerWheelHandler = useCallback(
+			(e) => {
+				if (mousewheel) {
+					if (e.preventDefault) e.preventDefault();
+					e.deltaY / 120 > 0 ? nextMove() : prevMove();
+				}
+			},
+			[mousewheel, nextMove, prevMove]
+		);
 
-		const imageViewerTouchStartHandler = (e) => {
-			if (touch) {
-				if (e.preventDefault) e.preventDefault();
-				startDragging();
-				rotateViewerImage(e);
-			}
+		const imageViewerTouchStartHandler = useCallback(
+			(e) => {
+				if (touch) {
+					if (e.preventDefault) e.preventDefault();
+					startDragging();
+					rotateViewerImage(e);
+				}
 
-			if (isAutoPlayRunning && stopAutoplayOnClick) {
-				toggleAutoplay(false);
-			}
-		};
+				if (isAutoPlayRunning && stopAutoplayOnClick) {
+					toggleAutoplay(false);
+				}
+			},
+			[
+				isAutoPlayRunning,
+				rotateViewerImage,
+				startDragging,
+				stopAutoplayOnClick,
+				toggleAutoplay,
+				touch
+			]
+		);
 
-		const imageViewerTouchMoveHandler = (e) => {
-			if (touch) {
-				if (e.preventDefault) e.preventDefault();
-				rotateViewerImage(e);
-			}
-		};
+		const imageViewerTouchMoveHandler = useCallback(
+			(e) => {
+				if (touch) {
+					if (e.preventDefault) e.preventDefault();
+					rotateViewerImage(e);
+				}
+			},
+			[rotateViewerImage, touch]
+		);
 
-		const imageViewerTouchEndHandler = (e) => {
-			if (touch) {
-				stopDragging();
-				resetMoveBuffer();
-			}
+		const imageViewerTouchEndHandler = useCallback(
+			(e) => {
+				if (touch) {
+					stopDragging();
+					resetMoveBuffer();
+				}
 
-			if (!isAutoPlayRunning && resumeAutoplayOnMouseLeave) {
-				toggleAutoplay(true);
-			}
-		};
+				if (!isAutoPlayRunning && resumeAutoplayOnMouseLeave) {
+					toggleAutoplay(true);
+				}
+			},
+			[isAutoPlayRunning, resumeAutoplayOnMouseLeave, stopDragging, toggleAutoplay, touch]
+		);
 
 		const imageViewerClickHandler = (e) => {
 			if (isRecording) {
@@ -275,10 +306,38 @@ const Tridi = forwardRef(
 		};
 
 		useEffect(() => {
+			const viewerRef = _viewerImageRef.current;
+			viewerRef.addEventListener('touchstart', imageViewerTouchStartHandler, {
+				passive: false
+			});
+			viewerRef.addEventListener('touchmove', imageViewerTouchMoveHandler, {
+				passive: false
+			});
+			viewerRef.addEventListener('touchend', imageViewerTouchEndHandler, {
+				passive: false
+			});
+			viewerRef.addEventListener('wheel', imageViewerWheelHandler, {
+				passive: false
+			});
+
+			return () => {
+				viewerRef.removeEventListener('touchstart', imageViewerTouchStartHandler);
+				viewerRef.removeEventListener('touchmove', imageViewerTouchMoveHandler);
+				viewerRef.removeEventListener('touchend', imageViewerTouchEndHandler);
+				viewerRef.removeEventListener('wheel', imageViewerWheelHandler);
+			};
+		}, [
+			imageViewerTouchEndHandler,
+			imageViewerTouchMoveHandler,
+			imageViewerTouchStartHandler,
+			imageViewerWheelHandler
+		]);
+
+		useEffect(() => {
 			if (autoplay) {
 				toggleAutoplay(autoplay);
 			}
-		}, [autoplay]);
+		}, [autoplay, toggleAutoplay]);
 
 		useInterval(
 			() => {
@@ -332,6 +391,8 @@ const Tridi = forwardRef(
 			return classNameStr;
 		};
 
+		if (!TridiUtils.isValidProps({ images, format, location })) return null;
+
 		return (
 			<div
 				className={generateViewerClassName()}
@@ -341,10 +402,6 @@ const Tridi = forwardRef(
 				onMouseMove={imageViewerMouseMoveHandler}
 				onMouseLeave={imageViewerMouseLeaveHandler}
 				onMouseEnter={imageViewerMouseEnterHandler}
-				onWheel={imageViewerWheelHandler}
-				onTouchStart={imageViewerTouchStartHandler}
-				onTouchMove={imageViewerTouchMoveHandler}
-				onTouchEnd={imageViewerTouchEndHandler}
 				onClick={imageViewerClickHandler}
 			>
 				{hintVisible && renderHint()}

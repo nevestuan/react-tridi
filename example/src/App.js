@@ -33,6 +33,7 @@ const App = () => {
 				onPinClick={pinClickHandler}
 				inverse
 				showControlBar
+				mousewheel
 			/>
 			<button onClick={() => tridiRef.current.prev()}>Prev</button>
 			<button onClick={() => tridiRef.current.next()}>Next</button>
