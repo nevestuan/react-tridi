@@ -29,7 +29,7 @@ const Pins = ({
 						renderPin ? (
 							<div
 								key={index}
-								className={`${styles['tridi-pin']}`}
+								className={`tridi-pin ${styles['tridi-pin']}`}
 								style={getPosition(pin)}
 								onDoubleClick={(e) => {
 									e.stopPropagation();
@@ -45,7 +45,7 @@ const Pins = ({
 						) : (
 							<div
 								key={index}
-								className={`${styles['tridi-dot']}`}
+								className={`tridi-dot ${styles['tridi-dot']}`}
 								style={getPosition(pin)}
 								onDoubleClick={(e) => {
 									e.stopPropagation();

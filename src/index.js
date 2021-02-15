@@ -52,6 +52,8 @@ const Tridi = forwardRef(
 			style,
 			images,
 			pins: propPins,
+			pinWidth,
+			pinHeight,
 			format,
 			location,
 			count,
@@ -284,8 +286,10 @@ const Tridi = forwardRef(
 				const clientY = e.clientY;
 				const viewerWidth = _viewerImageRef.current.clientWidth;
 				const viewerHeight = _viewerImageRef.current.clientHeight;
-				const x = (clientX / viewerWidth).toFixed(6);
-				const y = (clientY / viewerHeight).toFixed(6);
+				const viewerOffsetLeft = _viewerImageRef.current.getBoundingClientRect().left;
+				const viewerOffsetTop = _viewerImageRef.current.getBoundingClientRect().top;
+				const x = ((clientX - viewerOffsetLeft) / viewerWidth).toFixed(6);
+				const y = ((clientY - viewerOffsetTop) / viewerHeight).toFixed(6);
 				const pin = { id: TridiUtils.uid(), frameId: currentImageIndex, x, y };
 				const newPins = pins.concat(pin);
 				setPins(newPins);
@@ -421,6 +425,8 @@ const Tridi = forwardRef(
 					viewerWidth={_viewerImageRef?.current?.clientWidth}
 					viewerHeight={_viewerImageRef?.current?.clientHeight}
 					currentFrameId={currentImageIndex}
+					pinWidth={pinWidth}
+					pinHeight={pinHeight}
 					onPinDoubleClick={pinDoubleClickHandler}
 					onPinClick={pinClickHandler}
 					renderPin={renderPin}
@@ -435,6 +441,8 @@ Tridi.propTypes = {
 	style: PropTypes.object,
 	images: PropTypes.oneOfType([PropTypes.array, PropTypes.string]),
 	pins: PropTypes.array,
+	pinWidth: PropTypes.number,
+	pinHeight: PropTypes.number,
 	format: PropTypes.string,
 	location: PropTypes.string,
 	count: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
@@ -476,6 +484,8 @@ Tridi.defaultProps = {
 	style: undefined,
 	images: 'numbered',
 	pin: undefined,
+	pinWidth: 10,
+	pinHeight: 10,
 	format: undefined,
 	location: './images',
 	count: undefined,
