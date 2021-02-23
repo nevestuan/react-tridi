@@ -40,8 +40,8 @@ In this mode, you can load some pin points on top of the product images. There i
 The pins data structure looks like this:
 ```
 const pins = [
-  { "id": "kcyvybbrjkr8lz7w1j", "frameId": 0, "x": "0.664000", "y": "0.570922" },
-  { "id": "kcyvybrdbqwmi3z1ig", "frameId": 1, "x": "0.340000", "y": "0.500000" },
+  { "id": "kcyvybbrjkr8lz7w1j", "frameId": 0, "x": "0.664000", "y": "0.570922", "recordingSessionId": "klbp4jr3r7vyy5nnmkg" },
+  { "id": "kcyvybrdbqwmi3z1ig", "frameId": 1, "x": "0.340000", "y": "0.500000", "recordingSessionId": "klbp4jr3r7vyy5nnmkg" },
 ]
 ```
 
@@ -135,7 +135,9 @@ const Example = () => {
 | touchDragInterval | `number` | `2` | no | Adjust rotation speed for touch events
 | mouseleaveDetect | `boolean` | `false` | no | If true, active drag event will stop whenever mouse cursor leaves Tridi container
 | showControlBar | `boolean` | `false` | no | show a control bar with record, play, pause, next, prev functions
+| showStatusBar | `boolean` | `false` | no | show a status bar on recording
 | renderPin | `func` | `undefined` | no | render a customized pin point
+| setPins | `func` | `undefined` | no | function to set pin's state
 
 
 ## Prop Events

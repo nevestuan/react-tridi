@@ -121,7 +121,6 @@ const Tridi = forwardRef(
 
 		const prevFrame = useCallback(() => {
 			const newIndex = currentImageIndex <= 0 ? _count - 1 : currentImageIndex - 1;
-			console.log('prevFrame', { currentImageIndex, newIndex });
 			setCurrentImageIndex(newIndex);
 			onPrevFrame();
 			onFrameChange(newIndex);
