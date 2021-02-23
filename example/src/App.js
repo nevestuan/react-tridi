@@ -5,17 +5,23 @@ import 'react-tridi/dist/index.css';
 
 const App = () => {
 	const [isAutoPlayRunning, setIsAutoPlayRunning] = useState(false);
+	const [pins, setPins] = useState([]);
 	const tridiRef = useRef(null);
 
 	const frameChangeHandler = (currentFrameIndex) => {
 		console.log('current frame index', currentFrameIndex);
 	};
 
-	const recordStartHandler = (pins) => console.log('on record start', pins);
+	const recordStartHandler = (recordingSessionId) =>
+		console.log('on record start', { recordingSessionId, pins });
 
-	const recordStopHandler = (pins) => console.log('on record stop', pins);
+	const recordStopHandler = (recordingSessionId) =>
+		console.log('on record stop', { recordingSessionId, pins });
 
-	const pinClickHandler = (pin) => console.log('on pin click', pin);
+	const pinClickHandler = (pin) => {
+		console.log('on pin click', pin);
+		tridiRef.current.toggleRecording(true, pin.recordingSessionId);
+	};
 
 	return (
 		<div style={{ width: '500px' }}>
@@ -33,7 +39,10 @@ const App = () => {
 				onPinClick={pinClickHandler}
 				inverse
 				showControlBar
+				showStatusBar
 				mousewheel
+				pins={pins}
+				setPins={setPins}
 			/>
 			<button onClick={() => tridiRef.current.prev()}>Prev</button>
 			<button onClick={() => tridiRef.current.next()}>Next</button>
