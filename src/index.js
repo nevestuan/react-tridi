@@ -10,8 +10,10 @@ import PropTypes from 'prop-types';
 import styles from './styles.module.css';
 
 import useInterval from './hooks/useInterval';
+import useTridiKeyPressHandler from './hooks/useTridiKeyPressHandler';
 import ControlBar from './components/ControlBar';
 import Pins from './components/Pins';
+import StatusBar from './components/StatusBar';
 
 class TridiUtils {
 	static isValidProps = ({ images, format, location }) => {
@@ -51,9 +53,10 @@ const Tridi = forwardRef(
 			className,
 			style,
 			images,
-			pins: propPins,
+			pins,
 			pinWidth,
 			pinHeight,
+			setPins,
 			format,
 			location,
 			count,
@@ -72,6 +75,7 @@ const Tridi = forwardRef(
 			touchDragInterval,
 			mouseleaveDetect,
 			showControlBar,
+			showStatusBar,
 			renderPin,
 			onHintHide,
 			onAutoplayStart,
@@ -95,7 +99,8 @@ const Tridi = forwardRef(
 		const [isDragging, setIsDragging] = useState(false);
 		const [isAutoPlayRunning, setIsAutoPlayRunning] = useState(false);
 		const [isRecording, setIsRecording] = useState(false);
-		const [pins, setPins] = useState(propPins || []);
+		const [recordingSessionId, setRecordingSessionId] = useState(null);
+		const [isPlaying, setIsPlaying] = useState(false);
 
 		const _count = Array.isArray(images) ? images.length : Number(count);
 		const _images = TridiUtils.normalizedImages(images, format, location, _count);
@@ -116,6 +121,7 @@ const Tridi = forwardRef(
 
 		const prevFrame = useCallback(() => {
 			const newIndex = currentImageIndex <= 0 ? _count - 1 : currentImageIndex - 1;
+			console.log('prevFrame', { currentImageIndex, newIndex });
 			setCurrentImageIndex(newIndex);
 			onPrevFrame();
 			onFrameChange(newIndex);
@@ -175,9 +181,18 @@ const Tridi = forwardRef(
 			[onAutoplayStart, onAutoplayStop]
 		);
 
-		const toggleRecording = (state) => {
+		const toggleRecording = (state, existingSessionId) => {
 			setIsRecording(state);
-			return state ? onRecordStart(pins) : onRecordStop(pins);
+			const sessionId = recordingSessionId || existingSessionId || TridiUtils.uid();
+			if (state) {
+				if (!recordingSessionId) {
+					setRecordingSessionId(sessionId);
+				}
+				onRecordStart(sessionId);
+			} else {
+				setRecordingSessionId(null);
+				onRecordStop(sessionId);
+			}
 		};
 
 		// handlers
@@ -290,7 +305,13 @@ const Tridi = forwardRef(
 				const viewerOffsetTop = _viewerImageRef.current.getBoundingClientRect().top;
 				const x = ((clientX - viewerOffsetLeft) / viewerWidth).toFixed(6);
 				const y = ((clientY - viewerOffsetTop) / viewerHeight).toFixed(6);
-				const pin = { id: TridiUtils.uid(), frameId: currentImageIndex, x, y };
+				const pin = {
+					id: TridiUtils.uid(),
+					frameId: currentImageIndex,
+					x,
+					y,
+					recordingSessionId
+				};
 				const newPins = pins.concat(pin);
 				setPins(newPins);
 			}
@@ -309,6 +330,7 @@ const Tridi = forwardRef(
 			}
 		};
 
+		// effects
 		useEffect(() => {
 			const viewerRef = _viewerImageRef.current;
 			viewerRef.addEventListener('touchstart', imageViewerTouchStartHandler, {
@@ -351,11 +373,14 @@ const Tridi = forwardRef(
 		);
 
 		useImperativeHandle(ref, () => ({
-			toggleRecording: (state) => toggleRecording(state),
+			toggleRecording: (state, recordingSessionId) =>
+				toggleRecording(state, recordingSessionId),
 			toggleAutoplay: (state) => toggleAutoplay(state),
 			next: () => nextMove(),
 			prev: () => prevMove()
 		}));
+
+		useTridiKeyPressHandler({ nextMove, prevMove });
 
 		// render component helpers
 		const renderImages = () =>
@@ -410,8 +435,15 @@ const Tridi = forwardRef(
 			>
 				{hintVisible && renderHint()}
 				{_images?.length > 0 && renderImages()}
+				{showStatusBar && (
+					<StatusBar isRecording={isRecording} currentImageIndex={currentImageIndex} />
+				)}
 				{showControlBar && (
 					<ControlBar
+						isPlaying={isPlaying}
+						isRecording={isRecording}
+						setIsPlaying={setIsPlaying}
+						setIsRecording={setIsRecording}
 						onPlay={() => toggleAutoplay(true)}
 						onPause={() => toggleAutoplay(false)}
 						onNext={() => nextMove()}
@@ -461,8 +493,10 @@ Tridi.propTypes = {
 	touchDragInterval: PropTypes.number,
 	mouseleaveDetect: PropTypes.bool,
 	showControlBar: PropTypes.bool,
+	showStatusBar: PropTypes.bool,
 
 	renderPin: PropTypes.func,
+	setPins: PropTypes.func,
 
 	onHintHide: PropTypes.func,
 	onAutoplayStart: PropTypes.func,
@@ -504,8 +538,10 @@ Tridi.defaultProps = {
 	touchDragInterval: 2,
 	mouseleaveDetect: false,
 	showControlBar: false,
+	showStatusBar: false,
 
 	renderPin: undefined,
+	setPins: () => {},
 
 	onHintHide: () => {},
 	onAutoplayStart: () => {},

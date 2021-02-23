@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styles from './styles.module.css';
 import TargetIcon from '../../assets/icons/target.svg';
 import StopIcon from '../../assets/icons/stop.svg';
@@ -7,10 +7,18 @@ import PrevIcon from '../../assets/icons/previous.svg';
 import PauseIcon from '../../assets/icons/pause.svg';
 import PlayIcon from '../../assets/icons/play.svg';
 
-const ControlBar = ({ onPlay, onPause, onNext, onPrev, onRecordStart, onRecordStop }) => {
-	const [isPlaying, setIsPlaying] = useState(false);
-	const [isRecording, setIsRecording] = useState(false);
-
+const ControlBar = ({
+	isPlaying,
+	isRecording,
+	setIsPlaying,
+	setIsRecording,
+	onPlay,
+	onPause,
+	onNext,
+	onPrev,
+	onRecordStart,
+	onRecordStop
+}) => {
 	const playHandler = () => {
 		setIsPlaying(true);
 		onPlay();
