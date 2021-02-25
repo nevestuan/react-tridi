@@ -43,6 +43,8 @@ const App = () => {
 				mousewheel
 				pins={pins}
 				setPins={setPins}
+				hintOnStartup
+				hintText="Drag to view"
 			/>
 			<button onClick={() => tridiRef.current.prev()}>Prev</button>
 			<button onClick={() => tridiRef.current.next()}>Next</button>

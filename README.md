@@ -138,6 +138,7 @@ const Example = () => {
 | showStatusBar | `boolean` | `false` | no | show a status bar on recording
 | renderPin | `func` | `undefined` | no | render a customized pin point
 | setPins | `func` | `undefined` | no | function to set pin's state
+| renderHint | `func` | `undefined` | no | render a customized hint message
 
 
 ## Prop Events

@@ -1,5 +1,14 @@
 
 # Change Log
+
+## [1.2.1] - 2021-02-26
+ 
+### Added
+- Add a customizable render hint prop
+ 
+### Fixed
+- Fix bug of cannot touch on pins & control bar on mobile
+- Fix bug of badly rendering hint message
  
 ## [1.2.0] - 2021-02-24
  

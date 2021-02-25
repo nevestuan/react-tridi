@@ -4,7 +4,8 @@ import React, {
 	useRef,
 	forwardRef,
 	useImperativeHandle,
-	useCallback
+	useCallback,
+	Fragment
 } from 'react';
 import PropTypes from 'prop-types';
 import styles from './styles.module.css';
@@ -77,6 +78,7 @@ const Tridi = forwardRef(
 			showControlBar,
 			showStatusBar,
 			renderPin,
+			renderHint,
 			onHintHide,
 			onAutoplayStart,
 			onAutoplayStop,
@@ -196,6 +198,7 @@ const Tridi = forwardRef(
 
 		// handlers
 		const imageViewerMouseDownHandler = (e) => {
+			console.log('mouse down');
 			if (_draggable) {
 				if (e.preventDefault) e.preventDefault();
 				startDragging();
@@ -208,6 +211,7 @@ const Tridi = forwardRef(
 		};
 
 		const imageViewerMouseUpHandler = (e) => {
+			console.log('mouse up');
 			if (_draggable) {
 				if (e.preventDefault) e.preventDefault();
 				stopDragging();
@@ -250,6 +254,7 @@ const Tridi = forwardRef(
 
 		const imageViewerTouchStartHandler = useCallback(
 			(e) => {
+				console.log('touch start');
 				if (touch) {
 					if (e.preventDefault) e.preventDefault();
 					startDragging();
@@ -282,6 +287,7 @@ const Tridi = forwardRef(
 
 		const imageViewerTouchEndHandler = useCallback(
 			(e) => {
+				console.log('touch end');
 				if (touch) {
 					stopDragging();
 					resetMoveBuffer();
@@ -396,15 +402,21 @@ const Tridi = forwardRef(
 				/>
 			));
 
-		const renderHint = () => (
+		const renderHintOverlay = () => (
 			<div
 				className={`${styles['tridi-hint-overlay']}`}
 				onClick={hideHint}
 				onTouchStart={hideHint}
 			>
-				<div className={`${styles['tridi-hint']}`}>
-					{hintText && <span className={`${styles['tridi-hint-text']}`}>{hintText}</span>}
-				</div>
+				{!renderHint && (
+					<Fragment>
+						<div className={`${styles['tridi-hint']}`} />
+						{hintText && (
+							<span className={`${styles['tridi-hint-text']}`}>{hintText}</span>
+						)}
+					</Fragment>
+				)}
+				{renderHint && renderHint()}
 			</div>
 		);
 
@@ -422,18 +434,20 @@ const Tridi = forwardRef(
 		if (!TridiUtils.isValidProps({ images, format, location })) return null;
 
 		return (
-			<div
-				className={generateViewerClassName()}
-				ref={_viewerImageRef}
-				onMouseDown={imageViewerMouseDownHandler}
-				onMouseUp={imageViewerMouseUpHandler}
-				onMouseMove={imageViewerMouseMoveHandler}
-				onMouseLeave={imageViewerMouseLeaveHandler}
-				onMouseEnter={imageViewerMouseEnterHandler}
-				onClick={imageViewerClickHandler}
-			>
-				{hintVisible && renderHint()}
-				{_images?.length > 0 && renderImages()}
+			<div className={generateViewerClassName()}>
+				{hintVisible && renderHintOverlay()}
+				<div
+					ref={_viewerImageRef}
+					onMouseDown={imageViewerMouseDownHandler}
+					onMouseUp={imageViewerMouseUpHandler}
+					onMouseMove={imageViewerMouseMoveHandler}
+					onMouseLeave={imageViewerMouseLeaveHandler}
+					onMouseEnter={imageViewerMouseEnterHandler}
+					onClick={imageViewerClickHandler}
+					style={{ width: '100%' }}
+				>
+					{_images?.length > 0 && renderImages()}
+				</div>
 				{showStatusBar && (
 					<StatusBar isRecording={isRecording} currentImageIndex={currentImageIndex} />
 				)}
@@ -496,6 +510,7 @@ Tridi.propTypes = {
 
 	renderPin: PropTypes.func,
 	setPins: PropTypes.func,
+	renderHint: PropTypes.func,
 
 	onHintHide: PropTypes.func,
 	onAutoplayStart: PropTypes.func,
@@ -541,6 +556,7 @@ Tridi.defaultProps = {
 
 	renderPin: undefined,
 	setPins: () => {},
+	renderHint: undefined,
 
 	onHintHide: () => {},
 	onAutoplayStart: () => {},
