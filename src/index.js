@@ -198,7 +198,6 @@ const Tridi = forwardRef(
 
 		// handlers
 		const imageViewerMouseDownHandler = (e) => {
-			console.log('mouse down');
 			if (_draggable) {
 				if (e.preventDefault) e.preventDefault();
 				startDragging();
@@ -211,7 +210,6 @@ const Tridi = forwardRef(
 		};
 
 		const imageViewerMouseUpHandler = (e) => {
-			console.log('mouse up');
 			if (_draggable) {
 				if (e.preventDefault) e.preventDefault();
 				stopDragging();
@@ -254,7 +252,6 @@ const Tridi = forwardRef(
 
 		const imageViewerTouchStartHandler = useCallback(
 			(e) => {
-				console.log('touch start');
 				if (touch) {
 					if (e.preventDefault) e.preventDefault();
 					startDragging();
@@ -287,7 +284,6 @@ const Tridi = forwardRef(
 
 		const imageViewerTouchEndHandler = useCallback(
 			(e) => {
-				console.log('touch end');
 				if (touch) {
 					stopDragging();
 					resetMoveBuffer();
