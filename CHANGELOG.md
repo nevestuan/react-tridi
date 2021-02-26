@@ -1,6 +1,10 @@
 
 # Change Log
 
+## [1.2.2] - 2021-02-26
+### Fixed
+- Remove console logs
+
 ## [1.2.1] - 2021-02-26
  
 ### Added
