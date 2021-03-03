@@ -10,6 +10,7 @@ import PlayIcon from '../../assets/icons/play.svg';
 const ControlBar = ({
 	isPlaying,
 	isRecording,
+	isMoveing,
 	setIsPlaying,
 	setIsRecording,
 	onPlay,
@@ -17,7 +18,11 @@ const ControlBar = ({
 	onNext,
 	onPrev,
 	onRecordStart,
-	onRecordStop
+	onRecordStop,
+	onZoomout,
+	onZoomin,
+	onStartMoveing,
+	onStopMoveing
 }) => {
 	const playHandler = () => {
 		setIsPlaying(true);
@@ -37,6 +42,14 @@ const ControlBar = ({
 	const recordStopHandler = () => {
 		setIsRecording(false);
 		onRecordStop();
+	};
+
+	const moveStartHandler = () => {
+		onStartMoveing();
+	};
+
+	const moveStopHandler = () => {
+		onStopMoveing();
 	};
 
 	return (
@@ -67,9 +80,29 @@ const ControlBar = ({
 			<a className={`${styles['tridi-control-button']}`} onClick={onPrev}>
 				<PrevIcon />
 			</a>
+
 			<a className={`${styles['tridi-control-button']}`} onClick={onNext}>
 				<NextIcon />
 			</a>
+
+			<a className={`${styles['tridi-control-button']}`} onClick={onZoomout}>
+				<NextIcon />
+			</a>
+
+			<a className={`${styles['tridi-control-button']}`} onClick={onZoomin}>
+				<NextIcon />
+			</a>
+
+			{!isMoveing && (
+				<a className={`${styles['tridi-control-button']}`} onClick={moveStartHandler}>
+					<TargetIcon />
+				</a>
+			)}
+			{isMoveing && (
+				<a className={`${styles['tridi-control-button']}`} onClick={moveStopHandler}>
+					<StopIcon />
+				</a>
+			)}
 		</div>
 	);
 };

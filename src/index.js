@@ -91,18 +91,26 @@ const Tridi = forwardRef(
 			onFrameChange,
 			onRecordStart,
 			onRecordStop,
-			onPinClick
+			onPinClick,
+			onZoom,
+			maxZoom,
+			minZoom
 		},
 		ref
 	) => {
 		const [moveBuffer, setMoveBuffer] = useState([]);
 		const [hintVisible, setHintVisible] = useState(hintOnStartup);
 		const [currentImageIndex, setCurrentImageIndex] = useState(0);
+		const [zoom, setZoom] = useState(1);
 		const [isDragging, setIsDragging] = useState(false);
 		const [isAutoPlayRunning, setIsAutoPlayRunning] = useState(false);
 		const [isRecording, setIsRecording] = useState(false);
 		const [recordingSessionId, setRecordingSessionId] = useState(null);
 		const [isPlaying, setIsPlaying] = useState(false);
+		const [isMoveing, setIsMoveing] = useState(false);
+
+		const [viewerImageOfset, setViewerImageOfset] = useState({ x: 0, y: 0 });
+		const [moveingMouseDownPoint, setMoveingMouseDownPoint] = useState(null);
 
 		const _count = Array.isArray(images) ? images.length : Number(count);
 		const _images = TridiUtils.normalizedImages(images, format, location, _count);
@@ -203,7 +211,14 @@ const Tridi = forwardRef(
 				startDragging();
 				rotateViewerImage(e);
 			}
-
+			if (isMoveing) {
+				const clientX = e.clientX;
+				const clientY = e.clientY;
+				setMoveingMouseDownPoint({
+					x: clientX - viewerImageOfset.x,
+					y: clientY - viewerImageOfset.y
+				});
+			}
 			if (isAutoPlayRunning && stopAutoplayOnClick) {
 				toggleAutoplay(false);
 			}
@@ -215,9 +230,21 @@ const Tridi = forwardRef(
 				stopDragging();
 				resetMoveBuffer();
 			}
+			if (moveingMouseDownPoint) {
+				setMoveingMouseDownPoint(null);
+			}
 		};
 
 		const imageViewerMouseMoveHandler = (e) => {
+			if (isDragging && isMoveing && moveingMouseDownPoint) {
+				const clientX = e.clientX;
+				const clientY = e.clientY;
+				setViewerImageOfset({
+					x: clientX - moveingMouseDownPoint.x,
+					y: clientY - moveingMouseDownPoint.y
+				});
+				return;
+			}
 			if (_draggable && isDragging) {
 				rotateViewerImage(e);
 			}
@@ -440,10 +467,34 @@ const Tridi = forwardRef(
 					onMouseLeave={imageViewerMouseLeaveHandler}
 					onMouseEnter={imageViewerMouseEnterHandler}
 					onClick={imageViewerClickHandler}
-					style={{ width: '100%' }}
+					style={{
+						width: '100%'
+					}}
 				>
-					{_images?.length > 0 && renderImages()}
+					<div
+						style={{
+							width: '100%',
+							transform: `scale(${zoom}, ${zoom}) translate(${
+								viewerImageOfset.x / zoom
+							}px, ${viewerImageOfset.y / zoom}px)`
+						}}
+					>
+						{_images?.length > 0 && renderImages()}
+					</div>
+
+					<Pins
+						pins={pins}
+						viewerWidth={_viewerImageRef?.current?.clientWidth}
+						viewerHeight={_viewerImageRef?.current?.clientHeight}
+						currentFrameId={currentImageIndex}
+						pinWidth={pinWidth}
+						pinHeight={pinHeight}
+						onPinDoubleClick={pinDoubleClickHandler}
+						onPinClick={pinClickHandler}
+						renderPin={renderPin}
+					/>
 				</div>
+
 				{showStatusBar && (
 					<StatusBar isRecording={isRecording} currentImageIndex={currentImageIndex} />
 				)}
@@ -451,27 +502,38 @@ const Tridi = forwardRef(
 					<ControlBar
 						isPlaying={isPlaying}
 						isRecording={isRecording}
+						isMoveing={isMoveing}
 						setIsPlaying={setIsPlaying}
 						setIsRecording={setIsRecording}
+						setIsMoveing={setIsMoveing}
+						onStartMoveing={() => {
+							toggleRecording(false);
+							setIsMoveing(true);
+						}}
+						onStopMoveing={() => {
+							setIsMoveing(false);
+						}}
 						onPlay={() => toggleAutoplay(true)}
 						onPause={() => toggleAutoplay(false)}
 						onNext={() => nextMove()}
 						onPrev={() => prevMove()}
-						onRecordStart={() => toggleRecording(true)}
+						onRecordStart={() => {
+							toggleRecording(true);
+							setIsMoveing(false);
+						}}
 						onRecordStop={() => toggleRecording(false)}
+						onZoomout={() => {
+							const newZoom = Math.max(minZoom, zoom - 0.1);
+							setZoom(newZoom);
+							onZoom(newZoom);
+						}}
+						onZoomin={() => {
+							const newZoom = Math.min(maxZoom, zoom + 0.1);
+							setZoom(newZoom);
+							onZoom(newZoom);
+						}}
 					/>
 				)}
-				<Pins
-					pins={pins}
-					viewerWidth={_viewerImageRef?.current?.clientWidth}
-					viewerHeight={_viewerImageRef?.current?.clientHeight}
-					currentFrameId={currentImageIndex}
-					pinWidth={pinWidth}
-					pinHeight={pinHeight}
-					onPinDoubleClick={pinDoubleClickHandler}
-					onPinClick={pinClickHandler}
-					renderPin={renderPin}
-				/>
 			</div>
 		);
 	}
@@ -553,7 +615,8 @@ Tridi.defaultProps = {
 	renderPin: undefined,
 	setPins: () => {},
 	renderHint: undefined,
-
+	maxZoom: 3,
+	minZoom: 0.3,
 	onHintHide: () => {},
 	onAutoplayStart: () => {},
 	onAutoplayStop: () => {},
@@ -566,7 +629,8 @@ Tridi.defaultProps = {
 	onFrameChange: () => {},
 	onRecordStart: () => {},
 	onRecordStop: () => {},
-	onPinClick: () => {}
+	onPinClick: () => {},
+	onZoom: () => {}
 };
 
 export default Tridi;
