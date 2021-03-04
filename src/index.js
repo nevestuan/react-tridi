@@ -325,12 +325,17 @@ const Tridi = forwardRef(
 
 		const imageViewerClickHandler = (e) => {
 			if (isRecording) {
-				const clientX = e.clientX;
-				const clientY = e.clientY;
 				const viewerWidth = _viewerImageRef.current.clientWidth;
 				const viewerHeight = _viewerImageRef.current.clientHeight;
+				const clientX =
+					(e.clientX - viewerImageOfset.x - (viewerWidth - viewerWidth * zoom) / 2) /
+					zoom;
+				const clientY =
+					(e.clientY - viewerImageOfset.y - (viewerHeight - viewerHeight * zoom) / 2) /
+					zoom;
 				const viewerOffsetLeft = _viewerImageRef.current.getBoundingClientRect().left;
 				const viewerOffsetTop = _viewerImageRef.current.getBoundingClientRect().top;
+
 				const x = ((clientX - viewerOffsetLeft) / viewerWidth).toFixed(6);
 				const y = ((clientY - viewerOffsetTop) / viewerHeight).toFixed(6);
 				const pin = {
@@ -480,19 +485,18 @@ const Tridi = forwardRef(
 						}}
 					>
 						{_images?.length > 0 && renderImages()}
+						<Pins
+							pins={pins}
+							viewerWidth={_viewerImageRef?.current?.clientWidth}
+							viewerHeight={_viewerImageRef?.current?.clientHeight}
+							currentFrameId={currentImageIndex}
+							pinWidth={pinWidth}
+							pinHeight={pinHeight}
+							onPinDoubleClick={pinDoubleClickHandler}
+							onPinClick={pinClickHandler}
+							renderPin={renderPin}
+						/>
 					</div>
-
-					<Pins
-						pins={pins}
-						viewerWidth={_viewerImageRef?.current?.clientWidth}
-						viewerHeight={_viewerImageRef?.current?.clientHeight}
-						currentFrameId={currentImageIndex}
-						pinWidth={pinWidth}
-						pinHeight={pinHeight}
-						onPinDoubleClick={pinDoubleClickHandler}
-						onPinClick={pinClickHandler}
-						renderPin={renderPin}
-					/>
 				</div>
 
 				{showStatusBar && (
