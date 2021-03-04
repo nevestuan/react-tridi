@@ -1,11 +1,14 @@
 import React from 'react';
 import styles from './styles.module.css';
+
 import TargetIcon from '../../assets/icons/target.svg';
 import StopIcon from '../../assets/icons/stop.svg';
 import NextIcon from '../../assets/icons/next.svg';
-import PrevIcon from '../../assets/icons/previous.svg';
 import PauseIcon from '../../assets/icons/pause.svg';
 import PlayIcon from '../../assets/icons/play.svg';
+import ZoomInIcon from '../../assets/icons/zoomIn.svg';
+import ZoomOutIcon from '../../assets/icons/zoomOut.svg';
+import MoveIcon from '../../assets/icons/move.svg';
 
 const ControlBar = ({
 	isPlaying,
@@ -77,8 +80,12 @@ const ControlBar = ({
 					<PauseIcon />
 				</a>
 			)}
-			<a className={`${styles['tridi-control-button']}`} onClick={onPrev}>
-				<PrevIcon />
+			<a
+				className={`${styles['tridi-control-button']}`}
+				style={{ transform: 'rotate(180deg)' }}
+				onClick={onPrev}
+			>
+				<NextIcon />
 			</a>
 
 			<a className={`${styles['tridi-control-button']}`} onClick={onNext}>
@@ -86,16 +93,16 @@ const ControlBar = ({
 			</a>
 
 			<a className={`${styles['tridi-control-button']}`} onClick={onZoomout}>
-				<NextIcon />
+				<ZoomOutIcon />
 			</a>
 
 			<a className={`${styles['tridi-control-button']}`} onClick={onZoomin}>
-				<NextIcon />
+				<ZoomInIcon />
 			</a>
 
 			{!isMoveing && (
 				<a className={`${styles['tridi-control-button']}`} onClick={moveStartHandler}>
-					<TargetIcon />
+					<MoveIcon />
 				</a>
 			)}
 			{isMoveing && (

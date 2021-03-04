@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import PropTypes from 'prop-types';
 import styles from './styles.module.css';
+import DragIcon from './assets/icons/drag.svg';
 
 import useInterval from './hooks/useInterval';
 import useTridiKeyPressHandler from './hooks/useTridiKeyPressHandler';
@@ -438,7 +439,7 @@ const Tridi = forwardRef(
 			>
 				{!renderHint && (
 					<Fragment>
-						<div className={`${styles['tridi-hint']}`} />
+						<DragIcon />
 						{hintText && (
 							<span className={`${styles['tridi-hint-text']}`}>{hintText}</span>
 						)}
