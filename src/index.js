@@ -415,12 +415,16 @@ const Tridi = forwardRef(
 			next: () => nextMove(),
 			prev: () => prevMove()
 		}));
-		useEffect(() => {
-			setViewerSize({
-				width: _viewerImageRef?.current?.clientWidth,
-				height: _viewerImageRef?.current?.clientHeight
-			});
-		}, [setViewerSize]);
+
+		const loadImage = () => {
+			if (!viewerSize) {
+				setViewerSize({
+					width: _viewerImageRef?.current?.clientWidth,
+					height: _viewerImageRef?.current?.clientHeight
+				});
+			}
+		};
+
 		useTridiKeyPressHandler({ nextMove, prevMove });
 
 		// render component helpers
@@ -429,6 +433,7 @@ const Tridi = forwardRef(
 				<img
 					key={index}
 					src={src}
+					onLoad={loadImage}
 					className={`${styles['tridi-viewer-image']} ${
 						currentImageIndex === index
 							? styles['tridi-viewer-image-shown']
