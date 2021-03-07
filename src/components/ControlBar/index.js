@@ -25,7 +25,8 @@ const ControlBar = ({
 	onZoomout,
 	onZoomin,
 	onStartMoveing,
-	onStopMoveing
+	onStopMoveing,
+	hideRecord
 }) => {
 	const playHandler = () => {
 		setIsPlaying(true);
@@ -60,12 +61,12 @@ const ControlBar = ({
 			className={`tridi-control-bar ${styles['tridi-control-bar']}`}
 			onClick={(e) => e.stopPropagation()}
 		>
-			{!isRecording && (
+			{!hideRecord && !isRecording && (
 				<a className={`${styles['tridi-control-button']}`} onClick={recordStartHandler}>
 					<TargetIcon />
 				</a>
 			)}
-			{isRecording && (
+			{!hideRecord && isRecording && (
 				<a className={`${styles['tridi-control-button']}`} onClick={recordStopHandler}>
 					<StopIcon />
 				</a>

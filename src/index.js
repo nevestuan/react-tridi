@@ -95,7 +95,8 @@ const Tridi = forwardRef(
 			onPinClick,
 			onZoom,
 			maxZoom,
-			minZoom
+			minZoom,
+			hideRecord
 		},
 		ref
 	) => {
@@ -112,6 +113,7 @@ const Tridi = forwardRef(
 
 		const [viewerImageOfset, setViewerImageOfset] = useState({ x: 0, y: 0 });
 		const [moveingMouseDownPoint, setMoveingMouseDownPoint] = useState(null);
+		const [viewerSize, setViewerSize] = useState(null);
 
 		const _count = Array.isArray(images) ? images.length : Number(count);
 		const _images = TridiUtils.normalizedImages(images, format, location, _count);
@@ -413,7 +415,12 @@ const Tridi = forwardRef(
 			next: () => nextMove(),
 			prev: () => prevMove()
 		}));
-
+		useEffect(() => {
+			setViewerSize({
+				width: _viewerImageRef?.current?.clientWidth,
+				height: _viewerImageRef?.current?.clientHeight
+			});
+		}, [setViewerSize]);
 		useTridiKeyPressHandler({ nextMove, prevMove });
 
 		// render component helpers
@@ -486,17 +493,19 @@ const Tridi = forwardRef(
 						}}
 					>
 						{_images?.length > 0 && renderImages()}
-						<Pins
-							pins={pins}
-							viewerWidth={_viewerImageRef?.current?.clientWidth}
-							viewerHeight={_viewerImageRef?.current?.clientHeight}
-							currentFrameId={currentImageIndex}
-							pinWidth={pinWidth}
-							pinHeight={pinHeight}
-							onPinDoubleClick={pinDoubleClickHandler}
-							onPinClick={pinClickHandler}
-							renderPin={renderPin}
-						/>
+						{viewerSize ? (
+							<Pins
+								pins={pins}
+								viewerWidth={viewerSize.width}
+								viewerHeight={viewerSize.height}
+								currentFrameId={currentImageIndex}
+								pinWidth={pinWidth}
+								pinHeight={pinHeight}
+								onPinDoubleClick={pinDoubleClickHandler}
+								onPinClick={pinClickHandler}
+								renderPin={renderPin}
+							/>
+						) : null}
 					</div>
 				</div>
 
@@ -505,6 +514,7 @@ const Tridi = forwardRef(
 				)}
 				{showControlBar && (
 					<ControlBar
+						hideRecord={hideRecord}
 						isPlaying={isPlaying}
 						isRecording={isRecording}
 						isMoveing={isMoveing}
@@ -570,6 +580,7 @@ Tridi.propTypes = {
 	mouseleaveDetect: PropTypes.bool,
 	showControlBar: PropTypes.bool,
 	showStatusBar: PropTypes.bool,
+	hideRecord: PropTypes.bool,
 
 	renderPin: PropTypes.func,
 	setPins: PropTypes.func,
@@ -616,6 +627,7 @@ Tridi.defaultProps = {
 	mouseleaveDetect: false,
 	showControlBar: false,
 	showStatusBar: false,
+	hideRecord: false,
 
 	renderPin: undefined,
 	setPins: () => {},
