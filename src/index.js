@@ -283,7 +283,7 @@ const Tridi = forwardRef(
 		const imageViewerTouchStartHandler = useCallback(
 			(e) => {
 				if (touch) {
-					if (e.preventDefault) e.preventDefault();
+					//if (e.preventDefault) e.preventDefault();
 					startDragging();
 					rotateViewerImage(e);
 				}
@@ -305,7 +305,7 @@ const Tridi = forwardRef(
 		const imageViewerTouchMoveHandler = useCallback(
 			(e) => {
 				if (touch) {
-					if (e.preventDefault) e.preventDefault();
+					//if (e.preventDefault) e.preventDefault();
 					rotateViewerImage(e);
 				}
 			},
