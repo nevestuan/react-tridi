@@ -46,6 +46,7 @@ const App = () => {
 				hintOnStartup
 				hintText="Drag to view"
 			/>
+
 			<button onClick={() => tridiRef.current.prev()}>Prev</button>
 			<button onClick={() => tridiRef.current.next()}>Next</button>
 			<button onClick={() => tridiRef.current.toggleAutoplay(!isAutoPlayRunning)}>

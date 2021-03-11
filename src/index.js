@@ -9,12 +9,15 @@ import React, {
 } from 'react';
 import PropTypes from 'prop-types';
 import styles from './styles.module.css';
+import DragIcon from './assets/icons/drag.svg';
+import Animated from 'animated/lib/targets/react-dom';
 
 import useInterval from './hooks/useInterval';
 import useTridiKeyPressHandler from './hooks/useTridiKeyPressHandler';
 import ControlBar from './components/ControlBar';
 import Pins from './components/Pins';
 import StatusBar from './components/StatusBar';
+import Hammer from 'hammerjs';
 
 class TridiUtils {
 	static isValidProps = ({ images, format, location }) => {
@@ -91,22 +94,40 @@ const Tridi = forwardRef(
 			onFrameChange,
 			onRecordStart,
 			onRecordStop,
-			onPinClick
+			onPinClick,
+			onZoom,
+			maxZoom,
+			minZoom,
+			hideRecord
 		},
 		ref
 	) => {
 		const [moveBuffer, setMoveBuffer] = useState([]);
 		const [hintVisible, setHintVisible] = useState(hintOnStartup);
 		const [currentImageIndex, setCurrentImageIndex] = useState(0);
+		const [zoom, setZoom] = useState(1);
+
 		const [isDragging, setIsDragging] = useState(false);
 		const [isAutoPlayRunning, setIsAutoPlayRunning] = useState(false);
 		const [isRecording, setIsRecording] = useState(false);
 		const [recordingSessionId, setRecordingSessionId] = useState(null);
 		const [isPlaying, setIsPlaying] = useState(false);
+		const [isMoveing, setIsMoveing] = useState(false);
+
+		const AnimatedValues = useRef({
+			x: new Animated.Value(0),
+			y: new Animated.Value(0),
+			zoom: new Animated.Value(1),
+			originZoom: 1,
+			originOfset: null,
+			isZooming: false
+		});
+		const [viewerSize, setViewerSize] = useState(null);
 
 		const _count = Array.isArray(images) ? images.length : Number(count);
 		const _images = TridiUtils.normalizedImages(images, format, location, _count);
 		const _viewerImageRef = useRef(null);
+		const _viewerZoomRef = useRef(null);
 		const _draggable = !isRecording && draggable;
 
 		const hideHint = () => {
@@ -203,7 +224,14 @@ const Tridi = forwardRef(
 				startDragging();
 				rotateViewerImage(e);
 			}
-
+			if (isMoveing) {
+				const clientX = e.clientX;
+				const clientY = e.clientY;
+				AnimatedValues.current.originOfset = {
+					x: clientX - AnimatedValues.current.x._value,
+					y: clientY - AnimatedValues.current.y._value
+				};
+			}
 			if (isAutoPlayRunning && stopAutoplayOnClick) {
 				toggleAutoplay(false);
 			}
@@ -215,9 +243,17 @@ const Tridi = forwardRef(
 				stopDragging();
 				resetMoveBuffer();
 			}
+			AnimatedValues.current.originOfset = null;
 		};
 
 		const imageViewerMouseMoveHandler = (e) => {
+			if (isDragging && isMoveing && AnimatedValues.current.originOfset) {
+				const clientX = e.clientX;
+				const clientY = e.clientY;
+				AnimatedValues.current.x.setValue(clientX - AnimatedValues.current.originOfset.x);
+				AnimatedValues.current.y.setValue(clientY - AnimatedValues.current.originOfset.y);
+				return;
+			}
 			if (_draggable && isDragging) {
 				rotateViewerImage(e);
 			}
@@ -252,8 +288,17 @@ const Tridi = forwardRef(
 
 		const imageViewerTouchStartHandler = useCallback(
 			(e) => {
+				if (isMoveing) {
+					const clientX = e.touches[0].clientX;
+					const clientY = e.touches[0].clientY;
+					AnimatedValues.current.originOfset = {
+						x: clientX - AnimatedValues.current.x._value,
+						y: clientY - AnimatedValues.current.y._value
+					};
+					return;
+				}
 				if (touch) {
-					if (e.preventDefault) e.preventDefault();
+					// if (e.preventDefault) e.preventDefault();
 					startDragging();
 					rotateViewerImage(e);
 				}
@@ -268,22 +313,38 @@ const Tridi = forwardRef(
 				startDragging,
 				stopAutoplayOnClick,
 				toggleAutoplay,
-				touch
+				touch,
+				isMoveing
 			]
 		);
 
 		const imageViewerTouchMoveHandler = useCallback(
 			(e) => {
+				if (AnimatedValues.current.isZooming) {
+					return;
+				}
+				if (isMoveing && AnimatedValues.current.originOfset) {
+					const clientX = e.touches[0].clientX;
+					const clientY = e.touches[0].clientY;
+					AnimatedValues.current.x.setValue(
+						clientX - AnimatedValues.current.originOfset.x
+					);
+					AnimatedValues.current.y.setValue(
+						clientY - AnimatedValues.current.originOfset.y
+					);
+					return;
+				}
 				if (touch) {
-					if (e.preventDefault) e.preventDefault();
+					// if (e.preventDefault) e.preventDefault();
 					rotateViewerImage(e);
 				}
 			},
-			[rotateViewerImage, touch]
+			[rotateViewerImage, touch,isMoveing]
 		);
 
 		const imageViewerTouchEndHandler = useCallback(
 			(e) => {
+				AnimatedValues.current.originOfset = null;
 				if (touch) {
 					stopDragging();
 					resetMoveBuffer();
@@ -298,12 +359,21 @@ const Tridi = forwardRef(
 
 		const imageViewerClickHandler = (e) => {
 			if (isRecording) {
-				const clientX = e.clientX;
-				const clientY = e.clientY;
 				const viewerWidth = _viewerImageRef.current.clientWidth;
 				const viewerHeight = _viewerImageRef.current.clientHeight;
+				const clientX =
+					(e.clientX -
+						AnimatedValues.current.x._value -
+						(viewerWidth - viewerWidth * zoom) / 2) /
+					zoom;
+				const clientY =
+					(e.clientY -
+						AnimatedValues.current.y._value -
+						(viewerHeight - viewerHeight * zoom) / 2) /
+					zoom;
 				const viewerOffsetLeft = _viewerImageRef.current.getBoundingClientRect().left;
 				const viewerOffsetTop = _viewerImageRef.current.getBoundingClientRect().top;
+
 				const x = ((clientX - viewerOffsetLeft) / viewerWidth).toFixed(6);
 				const y = ((clientY - viewerOffsetTop) / viewerHeight).toFixed(6);
 				const pin = {
@@ -381,6 +451,15 @@ const Tridi = forwardRef(
 			prev: () => prevMove()
 		}));
 
+		const loadImage = () => {
+			if (!viewerSize) {
+				setViewerSize({
+					width: _viewerImageRef?.current?.clientWidth,
+					height: _viewerImageRef?.current?.clientHeight
+				});
+			}
+		};
+
 		useTridiKeyPressHandler({ nextMove, prevMove });
 
 		// render component helpers
@@ -389,6 +468,7 @@ const Tridi = forwardRef(
 				<img
 					key={index}
 					src={src}
+					onLoad={loadImage}
 					className={`${styles['tridi-viewer-image']} ${
 						currentImageIndex === index
 							? styles['tridi-viewer-image-shown']
@@ -406,7 +486,7 @@ const Tridi = forwardRef(
 			>
 				{!renderHint && (
 					<Fragment>
-						<div className={`${styles['tridi-hint']}`} />
+						<DragIcon />
 						{hintText && (
 							<span className={`${styles['tridi-hint-text']}`}>{hintText}</span>
 						)}
@@ -427,12 +507,67 @@ const Tridi = forwardRef(
 			return classNameStr;
 		};
 
-		if (!TridiUtils.isValidProps({ images, format, location })) return null;
+		const initHammer = useCallback(() => {
+			const element = document.getElementById('viewerImage');
+			console.log(element);
+			const mc = new Hammer.Manager(element);
+			const pinch = new Hammer.Pinch();
+			mc.add([pinch]);
+			mc.on('pinchstart', (ev) => {
+				AnimatedValues.current.originOfset = {
+					x: ev.center.x - AnimatedValues.current.x._value,
+					y: ev.center.y - AnimatedValues.current.y._value
+				};
+				AnimatedValues.current.originZoom = AnimatedValues.current.zoom._value;
+				AnimatedValues.current.isZooming = true;
+			});
+			mc.on('pinchend', (ev) => {
+				AnimatedValues.current.isZooming = false;
+				AnimatedValues.current.originOfset = null;
+			});
+			mc.on('pinchcancel', (ev) => {
+				AnimatedValues.current.isZooming = false;
+				AnimatedValues.current.originOfset = null;
+			});
+
+			mc.on('pinch', function (ev) {
+				let scale = AnimatedValues.current.originZoom - 1 + ev.scale;
+				scale = Math.max(minZoom, scale);
+				scale = Math.min(maxZoom, scale);
+
+				/* const offset = {
+					x: (ev.center.x - AnimatedValues.current.originOfset.x) / scale,
+					y: (ev.center.y - AnimatedValues.current.originOfset.y) / scale
+				};
+				if (offset.x !== AnimatedValues.current.x._value) {
+					AnimatedValues.current.x.setValue(offset.x);
+				}
+				if (offset.y !== AnimatedValues.current.y._value) {
+					AnimatedValues.current.y.setValue(offset.y);
+				} */
+
+				if (scale !== AnimatedValues.current.zoom._value) {
+					console.log(scale, AnimatedValues.current.originZoom, ev.scale);
+					AnimatedValues.current.zoom.setValue(scale);
+					onZoom(scale);
+				}
+			});
+		}, [setZoom, minZoom, maxZoom]);
+
+		useEffect(() => {
+			initHammer();
+		}, []);
+
+		if (!TridiUtils.isValidProps({ images, format, location })) {
+			console.log('null');
+			return null;
+		}
 
 		return (
 			<div className={generateViewerClassName()}>
 				{hintVisible && renderHintOverlay()}
 				<div
+					id="viewerImage"
 					ref={_viewerImageRef}
 					onMouseDown={imageViewerMouseDownHandler}
 					onMouseUp={imageViewerMouseUpHandler}
@@ -440,38 +575,84 @@ const Tridi = forwardRef(
 					onMouseLeave={imageViewerMouseLeaveHandler}
 					onMouseEnter={imageViewerMouseEnterHandler}
 					onClick={imageViewerClickHandler}
-					style={{ width: '100%' }}
+					style={{
+						width: '100%'
+					}}
 				>
-					{_images?.length > 0 && renderImages()}
+					<Animated.div
+						ref={_viewerZoomRef}
+						style={{
+							width: '100%',
+							transform: [
+								{ scale: AnimatedValues.current.zoom },
+								{ translateY: AnimatedValues.current.y },
+								{ translateX: AnimatedValues.current.x }
+							]
+						}}
+					>
+						{_images?.length > 0 && renderImages()}
+						{viewerSize ? (
+							<Pins
+								pins={pins}
+								viewerWidth={viewerSize.width}
+								viewerHeight={viewerSize.height}
+								currentFrameId={currentImageIndex}
+								pinWidth={pinWidth}
+								pinHeight={pinHeight}
+								onPinDoubleClick={pinDoubleClickHandler}
+								onPinClick={pinClickHandler}
+								renderPin={renderPin}
+							/>
+						) : null}
+					</Animated.div>
 				</div>
+
 				{showStatusBar && (
 					<StatusBar isRecording={isRecording} currentImageIndex={currentImageIndex} />
 				)}
 				{showControlBar && (
 					<ControlBar
+						hideRecord={hideRecord}
 						isPlaying={isPlaying}
 						isRecording={isRecording}
+						isMoveing={isMoveing}
 						setIsPlaying={setIsPlaying}
 						setIsRecording={setIsRecording}
+						setIsMoveing={setIsMoveing}
+						onStartMoveing={() => {
+							toggleRecording(false);
+							setIsMoveing(true);
+						}}
+						onStopMoveing={() => {
+							setIsMoveing(false);
+						}}
 						onPlay={() => toggleAutoplay(true)}
 						onPause={() => toggleAutoplay(false)}
 						onNext={() => nextMove()}
 						onPrev={() => prevMove()}
-						onRecordStart={() => toggleRecording(true)}
+						onRecordStart={() => {
+							toggleRecording(true);
+							setIsMoveing(false);
+						}}
 						onRecordStop={() => toggleRecording(false)}
+						onZoomout={() => {
+							const newZoom = Math.max(
+								minZoom,
+								AnimatedValues.current.zoom._value - 0.1
+							);
+							AnimatedValues.current.zoom.setValue(newZoom);
+							onZoom(newZoom);
+						}}
+						onZoomin={() => {
+							const newZoom = Math.min(
+								maxZoom,
+								AnimatedValues.current.zoom._value + 0.1
+							);
+							AnimatedValues.current.zoom.setValue(newZoom);
+							onZoom(newZoom);
+						}}
 					/>
 				)}
-				<Pins
-					pins={pins}
-					viewerWidth={_viewerImageRef?.current?.clientWidth}
-					viewerHeight={_viewerImageRef?.current?.clientHeight}
-					currentFrameId={currentImageIndex}
-					pinWidth={pinWidth}
-					pinHeight={pinHeight}
-					onPinDoubleClick={pinDoubleClickHandler}
-					onPinClick={pinClickHandler}
-					renderPin={renderPin}
-				/>
 			</div>
 		);
 	}
@@ -503,6 +684,7 @@ Tridi.propTypes = {
 	mouseleaveDetect: PropTypes.bool,
 	showControlBar: PropTypes.bool,
 	showStatusBar: PropTypes.bool,
+	hideRecord: PropTypes.bool,
 
 	renderPin: PropTypes.func,
 	setPins: PropTypes.func,
@@ -549,11 +731,13 @@ Tridi.defaultProps = {
 	mouseleaveDetect: false,
 	showControlBar: false,
 	showStatusBar: false,
+	hideRecord: false,
 
 	renderPin: undefined,
 	setPins: () => {},
 	renderHint: undefined,
-
+	maxZoom: 3,
+	minZoom: 0.3,
 	onHintHide: () => {},
 	onAutoplayStart: () => {},
 	onAutoplayStop: () => {},
@@ -566,7 +750,8 @@ Tridi.defaultProps = {
 	onFrameChange: () => {},
 	onRecordStart: () => {},
 	onRecordStop: () => {},
-	onPinClick: () => {}
+	onPinClick: () => {},
+	onZoom: () => {}
 };
 
 export default Tridi;

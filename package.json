@@ -1,6 +1,6 @@
 {
 	"name": "react-tridi",
-	"version": "1.2.2",
+	"version": "2.0.0-beta.1",
 	"description": "360-degree product viewer",
 	"author": "nevestuan",
 	"license": "MIT",
@@ -60,7 +60,9 @@
 		"react": "^16.13.1",
 		"react-dom": "^16.13.1",
 		"react-scripts": "^3.4.1",
-		"svg-react-loader": "^0.4.6"
+		"svg-react-loader": "^0.4.6",
+		"animated": "^0.2.2",
+		"hammerjs": "^2.0.8"
 	},
 	"files": [
 		"dist"
