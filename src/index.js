@@ -339,7 +339,7 @@ const Tridi = forwardRef(
 					rotateViewerImage(e);
 				}
 			},
-			[rotateViewerImage, touch,isMoveing]
+			[rotateViewerImage, touch, isMoveing]
 		);
 
 		const imageViewerTouchEndHandler = useCallback(
