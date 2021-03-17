@@ -517,7 +517,6 @@ const Tridi = forwardRef(
 
 		const initHammer = useCallback(() => {
 			const element = document.getElementById('viewerImage');
-			console.log(element);
 			const mc = new Hammer.Manager(element);
 			const pinch = new Hammer.Pinch();
 			mc.add([pinch]);
