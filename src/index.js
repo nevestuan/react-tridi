@@ -19,6 +19,8 @@ import Pins from './components/Pins';
 import StatusBar from './components/StatusBar';
 import Hammer from 'hammerjs';
 
+const AnimatedDiv = Animated.div;
+
 class TridiUtils {
 	static isValidProps = ({ images, format, location }) => {
 		let isValid = true;
@@ -105,7 +107,7 @@ const Tridi = forwardRef(
 		const [moveBuffer, setMoveBuffer] = useState([]);
 		const [hintVisible, setHintVisible] = useState(hintOnStartup);
 		const [currentImageIndex, setCurrentImageIndex] = useState(0);
-		const [zoom, setZoom] = useState(1);
+		const [zoom] = useState(1);
 
 		const [isDragging, setIsDragging] = useState(false);
 		const [isAutoPlayRunning, setIsAutoPlayRunning] = useState(false);
@@ -339,7 +341,7 @@ const Tridi = forwardRef(
 					rotateViewerImage(e);
 				}
 			},
-			[rotateViewerImage, touch,isMoveing]
+			[rotateViewerImage, touch, isMoveing]
 		);
 
 		const imageViewerTouchEndHandler = useCallback(
@@ -442,8 +444,14 @@ const Tridi = forwardRef(
 			},
 			isAutoPlayRunning ? autoplaySpeed : null
 		);
-
+		const setZoom = (zoom) => {
+			let newZoom = Math.max(minZoom, zoom);
+			newZoom = Math.min(maxZoom, newZoom);
+			AnimatedValues.current.zoom.setValue(newZoom);
+			onZoom(newZoom);
+		};
 		useImperativeHandle(ref, () => ({
+			setZoom: setZoom,
 			toggleRecording: (state, recordingSessionId) =>
 				toggleRecording(state, recordingSessionId),
 			toggleAutoplay: (state) => toggleAutoplay(state),
@@ -547,12 +555,11 @@ const Tridi = forwardRef(
 				} */
 
 				if (scale !== AnimatedValues.current.zoom._value) {
-					console.log(scale, AnimatedValues.current.originZoom, ev.scale);
 					AnimatedValues.current.zoom.setValue(scale);
 					onZoom(scale);
 				}
 			});
-		}, [setZoom, minZoom, maxZoom]);
+		}, [minZoom, maxZoom]);
 
 		useEffect(() => {
 			initHammer();
@@ -562,7 +569,6 @@ const Tridi = forwardRef(
 			console.log('null');
 			return null;
 		}
-
 		return (
 			<div className={generateViewerClassName()}>
 				{hintVisible && renderHintOverlay()}
@@ -579,7 +585,7 @@ const Tridi = forwardRef(
 						width: '100%'
 					}}
 				>
-					<Animated.div
+					<AnimatedDiv
 						ref={_viewerZoomRef}
 						style={{
 							width: '100%',
@@ -604,7 +610,7 @@ const Tridi = forwardRef(
 								renderPin={renderPin}
 							/>
 						) : null}
-					</Animated.div>
+					</AnimatedDiv>
 				</div>
 
 				{showStatusBar && (
@@ -636,20 +642,10 @@ const Tridi = forwardRef(
 						}}
 						onRecordStop={() => toggleRecording(false)}
 						onZoomout={() => {
-							const newZoom = Math.max(
-								minZoom,
-								AnimatedValues.current.zoom._value - 0.1
-							);
-							AnimatedValues.current.zoom.setValue(newZoom);
-							onZoom(newZoom);
+							setZoom(AnimatedValues.current.zoom._value - 0.1);
 						}}
 						onZoomin={() => {
-							const newZoom = Math.min(
-								maxZoom,
-								AnimatedValues.current.zoom._value + 0.1
-							);
-							AnimatedValues.current.zoom.setValue(newZoom);
-							onZoom(newZoom);
+							setZoom(AnimatedValues.current.zoom._value + 0.1);
 						}}
 					/>
 				)}
