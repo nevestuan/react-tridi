@@ -19,6 +19,8 @@ import Pins from './components/Pins';
 import StatusBar from './components/StatusBar';
 import Hammer from 'hammerjs';
 
+const AnimatedDiv = Animated.div;
+
 class TridiUtils {
 	static isValidProps = ({ images, format, location }) => {
 		let isValid = true;
@@ -82,6 +84,7 @@ const Tridi = forwardRef(
 			showStatusBar,
 			renderPin,
 			renderHint,
+			zoom,
 			onHintHide,
 			onAutoplayStart,
 			onAutoplayStop,
@@ -105,7 +108,6 @@ const Tridi = forwardRef(
 		const [moveBuffer, setMoveBuffer] = useState([]);
 		const [hintVisible, setHintVisible] = useState(hintOnStartup);
 		const [currentImageIndex, setCurrentImageIndex] = useState(0);
-		const [zoom, setZoom] = useState(1);
 
 		const [isDragging, setIsDragging] = useState(false);
 		const [isAutoPlayRunning, setIsAutoPlayRunning] = useState(false);
@@ -117,11 +119,12 @@ const Tridi = forwardRef(
 		const AnimatedValues = useRef({
 			x: new Animated.Value(0),
 			y: new Animated.Value(0),
-			zoom: new Animated.Value(1),
+			zoom: new Animated.Value(zoom),
 			originZoom: 1,
 			originOfset: null,
 			isZooming: false
 		});
+
 		const [viewerSize, setViewerSize] = useState(null);
 
 		const _count = Array.isArray(images) ? images.length : Number(count);
@@ -364,13 +367,13 @@ const Tridi = forwardRef(
 				const clientX =
 					(e.clientX -
 						AnimatedValues.current.x._value -
-						(viewerWidth - viewerWidth * zoom) / 2) /
-					zoom;
+						(viewerWidth - viewerWidth * AnimatedValues.current.zoom._value) / 2) /
+					AnimatedValues.current.zoom._value;
 				const clientY =
 					(e.clientY -
 						AnimatedValues.current.y._value -
-						(viewerHeight - viewerHeight * zoom) / 2) /
-					zoom;
+						(viewerHeight - viewerHeight * AnimatedValues.current.zoom._value) / 2) /
+					AnimatedValues.current.zoom._value;
 				const viewerOffsetLeft = _viewerImageRef.current.getBoundingClientRect().left;
 				const viewerOffsetTop = _viewerImageRef.current.getBoundingClientRect().top;
 
@@ -442,8 +445,24 @@ const Tridi = forwardRef(
 			},
 			isAutoPlayRunning ? autoplaySpeed : null
 		);
+		const setZoom = (zoom) => {
+			let newZoom = Math.max(minZoom, zoom);
+			newZoom = Math.min(maxZoom, newZoom);
+			AnimatedValues.current.zoom.setValue(newZoom);
+			onZoom(newZoom);
+		};
+
+		useEffect(() => {
+			if (zoom !== undefined && zoom !== AnimatedValues.current.zoom._value) {
+				let newZoom = Math.max(minZoom, zoom);
+				newZoom = Math.min(maxZoom, newZoom);
+				AnimatedValues.current.zoom.setValue(newZoom);
+				onZoom(newZoom);
+			}
+		}, [zoom, onZoom]);
 
 		useImperativeHandle(ref, () => ({
+			setZoom: setZoom,
 			toggleRecording: (state, recordingSessionId) =>
 				toggleRecording(state, recordingSessionId),
 			toggleAutoplay: (state) => toggleAutoplay(state),
@@ -509,7 +528,6 @@ const Tridi = forwardRef(
 
 		const initHammer = useCallback(() => {
 			const element = document.getElementById('viewerImage');
-			console.log(element);
 			const mc = new Hammer.Manager(element);
 			const pinch = new Hammer.Pinch();
 			mc.add([pinch]);
@@ -547,12 +565,11 @@ const Tridi = forwardRef(
 				} */
 
 				if (scale !== AnimatedValues.current.zoom._value) {
-					console.log(scale, AnimatedValues.current.originZoom, ev.scale);
 					AnimatedValues.current.zoom.setValue(scale);
 					onZoom(scale);
 				}
 			});
-		}, [setZoom, minZoom, maxZoom]);
+		}, [minZoom, maxZoom]);
 
 		useEffect(() => {
 			initHammer();
@@ -562,7 +579,6 @@ const Tridi = forwardRef(
 			console.log('null');
 			return null;
 		}
-
 		return (
 			<div className={generateViewerClassName()}>
 				{hintVisible && renderHintOverlay()}
@@ -579,7 +595,7 @@ const Tridi = forwardRef(
 						width: '100%'
 					}}
 				>
-					<Animated.div
+					<AnimatedDiv
 						ref={_viewerZoomRef}
 						style={{
 							width: '100%',
@@ -604,7 +620,7 @@ const Tridi = forwardRef(
 								renderPin={renderPin}
 							/>
 						) : null}
-					</Animated.div>
+					</AnimatedDiv>
 				</div>
 
 				{showStatusBar && (
@@ -636,20 +652,10 @@ const Tridi = forwardRef(
 						}}
 						onRecordStop={() => toggleRecording(false)}
 						onZoomout={() => {
-							const newZoom = Math.max(
-								minZoom,
-								AnimatedValues.current.zoom._value - 0.1
-							);
-							AnimatedValues.current.zoom.setValue(newZoom);
-							onZoom(newZoom);
+							setZoom(AnimatedValues.current.zoom._value - 0.1);
 						}}
 						onZoomin={() => {
-							const newZoom = Math.min(
-								maxZoom,
-								AnimatedValues.current.zoom._value + 0.1
-							);
-							AnimatedValues.current.zoom.setValue(newZoom);
-							onZoom(newZoom);
+							setZoom(AnimatedValues.current.zoom._value + 0.1);
 						}}
 					/>
 				)}
@@ -689,6 +695,9 @@ Tridi.propTypes = {
 	renderPin: PropTypes.func,
 	setPins: PropTypes.func,
 	renderHint: PropTypes.func,
+	zoom: PropTypes.number,
+	maxZoom: PropTypes.number,
+	minZoom: PropTypes.number,
 
 	onHintHide: PropTypes.func,
 	onAutoplayStart: PropTypes.func,
@@ -736,6 +745,7 @@ Tridi.defaultProps = {
 	renderPin: undefined,
 	setPins: () => {},
 	renderHint: undefined,
+	zoom: undefined,
 	maxZoom: 3,
 	minZoom: 0.3,
 	onHintHide: () => {},
