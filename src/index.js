@@ -745,7 +745,7 @@ Tridi.defaultProps = {
 	renderPin: undefined,
 	setPins: () => {},
 	renderHint: undefined,
-	zoom: undefined,
+	zoom: 1,
 	maxZoom: 3,
 	minZoom: 0.3,
 	onHintHide: () => {},
