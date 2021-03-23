@@ -576,7 +576,7 @@ const Tridi = forwardRef(
 		}, []);
 
 		if (!TridiUtils.isValidProps({ images, format, location })) {
-			console.log('null');
+			console.log('Invalid Settings');
 			return null;
 		}
 		return (
