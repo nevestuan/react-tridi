@@ -121,7 +121,7 @@ const Tridi = forwardRef(
 			y: new Animated.Value(0),
 			zoom: new Animated.Value(zoom),
 			originZoom: 1,
-			originOfset: null,
+			originOffset: null,
 			isZooming: false
 		});
 
@@ -206,18 +206,48 @@ const Tridi = forwardRef(
 			[onAutoplayStart, onAutoplayStop]
 		);
 
-		const toggleRecording = (state, existingSessionId) => {
-			setIsRecording(state);
-			const sessionId = recordingSessionId || existingSessionId || TridiUtils.uid();
-			if (state) {
-				if (!recordingSessionId) {
-					setRecordingSessionId(sessionId);
+		const toggleRecording = useCallback(
+			(state, existingSessionId) => {
+				setIsRecording(state);
+				const sessionId = recordingSessionId || existingSessionId || TridiUtils.uid();
+				if (state) {
+					if (!recordingSessionId) {
+						setRecordingSessionId(sessionId);
+					}
+					onRecordStart(sessionId);
+				} else {
+					setRecordingSessionId(null);
+					onRecordStop(sessionId);
 				}
-				onRecordStart(sessionId);
-			} else {
-				setRecordingSessionId(null);
-				onRecordStop(sessionId);
-			}
+			},
+			[onRecordStart, onRecordStop, recordingSessionId]
+		);
+
+		const resetPosition = useCallback(() => {
+			console.log('resetPosition');
+			AnimatedValues.current.x.setValue(0);
+			AnimatedValues.current.y.setValue(0);
+			AnimatedValues.current.zoom.setValue(zoom);
+		}, []);
+
+		const toggleMoving = useCallback(
+			(isMoving) => {
+				if (isMoving) {
+					toggleRecording(false);
+					setIsMoveing(true);
+				} else {
+					resetPosition();
+					setIsMoveing(false);
+				}
+			},
+			[resetPosition, toggleRecording]
+		);
+
+		const setZoom = (zoom) => {
+			let newZoom = Math.max(minZoom, zoom);
+			newZoom = Math.min(maxZoom, newZoom);
+			AnimatedValues.current.zoom.setValue(newZoom);
+			onZoom(newZoom);
 		};
 
 		// handlers
@@ -230,7 +260,7 @@ const Tridi = forwardRef(
 			if (isMoveing) {
 				const clientX = e.clientX;
 				const clientY = e.clientY;
-				AnimatedValues.current.originOfset = {
+				AnimatedValues.current.originOffset = {
 					x: clientX - AnimatedValues.current.x._value,
 					y: clientY - AnimatedValues.current.y._value
 				};
@@ -246,15 +276,15 @@ const Tridi = forwardRef(
 				stopDragging();
 				resetMoveBuffer();
 			}
-			AnimatedValues.current.originOfset = null;
+			AnimatedValues.current.originOffset = null;
 		};
 
 		const imageViewerMouseMoveHandler = (e) => {
-			if (isDragging && isMoveing && AnimatedValues.current.originOfset) {
+			if (isDragging && isMoveing && AnimatedValues.current.originOffset) {
 				const clientX = e.clientX;
 				const clientY = e.clientY;
-				AnimatedValues.current.x.setValue(clientX - AnimatedValues.current.originOfset.x);
-				AnimatedValues.current.y.setValue(clientY - AnimatedValues.current.originOfset.y);
+				AnimatedValues.current.x.setValue(clientX - AnimatedValues.current.originOffset.x);
+				AnimatedValues.current.y.setValue(clientY - AnimatedValues.current.originOffset.y);
 				return;
 			}
 			if (_draggable && isDragging) {
@@ -294,7 +324,7 @@ const Tridi = forwardRef(
 				if (isMoveing) {
 					const clientX = e.touches[0].clientX;
 					const clientY = e.touches[0].clientY;
-					AnimatedValues.current.originOfset = {
+					AnimatedValues.current.originOffset = {
 						x: clientX - AnimatedValues.current.x._value,
 						y: clientY - AnimatedValues.current.y._value
 					};
@@ -326,14 +356,14 @@ const Tridi = forwardRef(
 				if (AnimatedValues.current.isZooming) {
 					return;
 				}
-				if (isMoveing && AnimatedValues.current.originOfset) {
+				if (isMoveing && AnimatedValues.current.originOffset) {
 					const clientX = e.touches[0].clientX;
 					const clientY = e.touches[0].clientY;
 					AnimatedValues.current.x.setValue(
-						clientX - AnimatedValues.current.originOfset.x
+						clientX - AnimatedValues.current.originOffset.x
 					);
 					AnimatedValues.current.y.setValue(
-						clientY - AnimatedValues.current.originOfset.y
+						clientY - AnimatedValues.current.originOffset.y
 					);
 					return;
 				}
@@ -347,7 +377,7 @@ const Tridi = forwardRef(
 
 		const imageViewerTouchEndHandler = useCallback(
 			(e) => {
-				AnimatedValues.current.originOfset = null;
+				AnimatedValues.current.originOffset = null;
 				if (touch) {
 					stopDragging();
 					resetMoveBuffer();
@@ -445,12 +475,6 @@ const Tridi = forwardRef(
 			},
 			isAutoPlayRunning ? autoplaySpeed : null
 		);
-		const setZoom = (zoom) => {
-			let newZoom = Math.max(minZoom, zoom);
-			newZoom = Math.min(maxZoom, newZoom);
-			AnimatedValues.current.zoom.setValue(newZoom);
-			onZoom(newZoom);
-		};
 
 		useEffect(() => {
 			if (zoom !== undefined && zoom !== AnimatedValues.current.zoom._value) {
@@ -466,6 +490,7 @@ const Tridi = forwardRef(
 			toggleRecording: (state, recordingSessionId) =>
 				toggleRecording(state, recordingSessionId),
 			toggleAutoplay: (state) => toggleAutoplay(state),
+			toggleMoving: (isMoving) => toggleMoving(isMoving),
 			next: () => nextMove(),
 			prev: () => prevMove()
 		}));
@@ -532,7 +557,7 @@ const Tridi = forwardRef(
 			const pinch = new Hammer.Pinch();
 			mc.add([pinch]);
 			mc.on('pinchstart', (ev) => {
-				AnimatedValues.current.originOfset = {
+				AnimatedValues.current.originOffset = {
 					x: ev.center.x - AnimatedValues.current.x._value,
 					y: ev.center.y - AnimatedValues.current.y._value
 				};
@@ -541,11 +566,11 @@ const Tridi = forwardRef(
 			});
 			mc.on('pinchend', (ev) => {
 				AnimatedValues.current.isZooming = false;
-				AnimatedValues.current.originOfset = null;
+				AnimatedValues.current.originOffset = null;
 			});
 			mc.on('pinchcancel', (ev) => {
 				AnimatedValues.current.isZooming = false;
-				AnimatedValues.current.originOfset = null;
+				AnimatedValues.current.originOffset = null;
 			});
 
 			mc.on('pinch', function (ev) {
@@ -554,8 +579,8 @@ const Tridi = forwardRef(
 				scale = Math.min(maxZoom, scale);
 
 				/* const offset = {
-					x: (ev.center.x - AnimatedValues.current.originOfset.x) / scale,
-					y: (ev.center.y - AnimatedValues.current.originOfset.y) / scale
+					x: (ev.center.x - AnimatedValues.current.originOffset.x) / scale,
+					y: (ev.center.y - AnimatedValues.current.originOffset.y) / scale
 				};
 				if (offset.x !== AnimatedValues.current.x._value) {
 					AnimatedValues.current.x.setValue(offset.x);
@@ -635,13 +660,8 @@ const Tridi = forwardRef(
 						setIsPlaying={setIsPlaying}
 						setIsRecording={setIsRecording}
 						setIsMoveing={setIsMoveing}
-						onStartMoveing={() => {
-							toggleRecording(false);
-							setIsMoveing(true);
-						}}
-						onStopMoveing={() => {
-							setIsMoveing(false);
-						}}
+						onStartMoveing={() => toggleMoving(true)}
+						onStopMoveing={() => toggleMoving(false)}
 						onPlay={() => toggleAutoplay(true)}
 						onPause={() => toggleAutoplay(false)}
 						onNext={() => nextMove()}
@@ -747,7 +767,7 @@ Tridi.defaultProps = {
 	renderHint: undefined,
 	zoom: 1,
 	maxZoom: 3,
-	minZoom: 0.3,
+	minZoom: 1,
 	onHintHide: () => {},
 	onAutoplayStart: () => {},
 	onAutoplayStop: () => {},

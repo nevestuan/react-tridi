@@ -138,7 +138,7 @@ const Example = () => {
 | showStatusBar | `boolean` | `false` | no | show a status bar on recording
 | hideRecord | `boolean` | `false` | no | hide record button in the control bar
 | zoom | `number` | `1` | no | default zoom value
-| minZoom | `number` | `0.3` | no | minimum zoom value
+| minZoom | `number` | `1` | no | minimum zoom value
 | maxZoom | `number` | `3` | no | maximum zoom value
 | renderPin | `func` | `undefined` | no | render a customized pin point
 | setPins | `func` | `undefined` | no | function to set pin's state
@@ -171,6 +171,7 @@ const Example = () => {
 | next() | `null` | trigger next move
 | toggleAutoPlay(true/false) | `boolean` | toogle autoplay
 | toggleRecording(true/false) | `boolean` | toggle recording pins' coordinates
+| toggleMoving(true/false) | `boolean` | toogle moving photo while zooming
 
 
 ## License
