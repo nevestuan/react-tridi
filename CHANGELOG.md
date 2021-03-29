@@ -1,6 +1,14 @@
 
 # Change Log
 
+## [2.0.0] - 2021-03-23
+### Added
+- Zoom function: zoom in, zoom out the image
+- Move function: move the image in zoom mode
+
+### Fixed
+- Some bugs related to wrong pin's position
+
 ## [1.2.2] - 2021-02-26
 ### Fixed
 - Remove console logs

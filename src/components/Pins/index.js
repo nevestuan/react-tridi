@@ -13,11 +13,14 @@ const Pins = ({
 	onPinClick
 }) => {
 	const getPosition = (pin) => {
-		let left = viewerWidth * pin.x - pinWidth / 2;
-		let top = viewerHeight * pin.y - pinHeight / 2;
-		if (left < 0) left = 0;
-		if (top < 0) top = 0;
-		if (left >= 0 && top >= 0) return { left, top };
+		if (viewerWidth >= 0 && viewerHeight >= 0) {
+			return {
+				left: (pin.x * 100).toFixed(3) + '%',
+				marginTop: `-${pinHeight / 2}px`,
+				marginLeft: `-${pinWidth / 2}px`,
+				top: (pin.y * 100).toFixed(3) + '%'
+			};
+		}
 		return { display: 'none' };
 	};
 	return (

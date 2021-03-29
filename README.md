@@ -136,6 +136,10 @@ const Example = () => {
 | mouseleaveDetect | `boolean` | `false` | no | If true, active drag event will stop whenever mouse cursor leaves Tridi container
 | showControlBar | `boolean` | `false` | no | show a control bar with record, play, pause, next, prev functions
 | showStatusBar | `boolean` | `false` | no | show a status bar on recording
+| hideRecord | `boolean` | `false` | no | hide record button in the control bar
+| zoom | `number` | `1` | no | default zoom value
+| minZoom | `number` | `1` | no | minimum zoom value
+| maxZoom | `number` | `3` | no | maximum zoom value
 | renderPin | `func` | `undefined` | no | render a customized pin point
 | setPins | `func` | `undefined` | no | function to set pin's state
 | renderHint | `func` | `undefined` | no | render a customized hint message
@@ -154,9 +158,10 @@ const Example = () => {
 | onDragStart | `null` | Image rotation sequence (dragging) starts
 | onDragEnd | `null` | Image rotation sequence (dragging) ends
 | onFrameChange | `number` | Next image is loaded, sending out the current image index
-| onRecordStart | `null` | return a current pins array on start recording
-| onRecordStop | `null` | return a current pins array on stop recording
-| onPinClick | `null` | return a pin info on click in normal mode
+| onRecordStart | `null` | get current sessionId on start recording
+| onRecordStop | `null` | get current sessionId on stop recording
+| onPinClick | `null` | get a pin info on click in normal mode
+| onZoom | `null` | get the current zoom scale value
 
 
 ## Ref Functions
@@ -166,6 +171,7 @@ const Example = () => {
 | next() | `null` | trigger next move
 | toggleAutoPlay(true/false) | `boolean` | toogle autoplay
 | toggleRecording(true/false) | `boolean` | toggle recording pins' coordinates
+| toggleMoving(true/false) | `boolean` | toogle moving photo while zooming
 
 
 ## License
