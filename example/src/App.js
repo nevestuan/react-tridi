@@ -23,6 +23,11 @@ const App = () => {
 		tridiRef.current.toggleRecording(true, pin.recordingSessionId);
 	};
 
+	const onLoadChange = (loaded, percentage) =>{
+		console.log('have all Image loaded? : '+ loaded);
+		console.log('current load percentage : ' + percentage + "%");
+	}
+
 	return (
 		<div style={{ width: '500px' }}>
 			<Tridi
@@ -45,6 +50,7 @@ const App = () => {
 				setPins={setPins}
 				hintOnStartup
 				hintText="Drag to view"
+				onLoadChange = {onLoadChange}
 			/>
 
 			<button onClick={() => tridiRef.current.prev()}>Prev</button>
