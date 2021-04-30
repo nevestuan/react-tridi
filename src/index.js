@@ -101,7 +101,8 @@ const Tridi = forwardRef(
 			onZoom,
 			maxZoom,
 			minZoom,
-			hideRecord
+			hideRecord,
+			onLoadChange
 		},
 		ref
 	) => {
@@ -132,6 +133,7 @@ const Tridi = forwardRef(
 		const _viewerImageRef = useRef(null);
 		const _viewerZoomRef = useRef(null);
 		const _draggable = !isRecording && draggable;
+		const [loadedImagesCount, setLoadedImagesCount] = useState(0);
 
 		const hideHint = () => {
 			setHintVisible(false);
@@ -496,13 +498,20 @@ const Tridi = forwardRef(
 		}));
 
 		const loadImage = () => {
+			setLoadedImagesCount(loadedImagesCount + 1);
+			onImageLoaded();
 			if (!viewerSize) {
 				setViewerSize({
 					width: _viewerImageRef?.current?.clientWidth,
 					height: _viewerImageRef?.current?.clientHeight
 				});
 			}
+			// onLoadChange(loadedImagesCount === _count, Math.round((loadedImagesCount / _count)* 100));
 		};
+
+		const onImageLoaded = useCallback(() => {
+			onLoadChange(loadedImagesCount + 1 === _count, Math.round(((loadedImagesCount + 1)/ _count)* 100));
+		}, [_count, loadedImagesCount, onLoadChange]);
 
 		useTridiKeyPressHandler({ nextMove, prevMove });
 
@@ -731,7 +740,8 @@ Tridi.propTypes = {
 	onFrameChange: PropTypes.func,
 	onRecordStart: PropTypes.func,
 	onRecordStop: PropTypes.func,
-	onPinClick: PropTypes.func
+	onPinClick: PropTypes.func,
+	onLoadChange: PropTypes.func,
 };
 
 Tridi.defaultProps = {
@@ -781,7 +791,8 @@ Tridi.defaultProps = {
 	onRecordStart: () => {},
 	onRecordStop: () => {},
 	onPinClick: () => {},
-	onZoom: () => {}
+	onZoom: () => {},
+	onLoadChange: () => {},
 };
 
 export default Tridi;

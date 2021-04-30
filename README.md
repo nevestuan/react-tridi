@@ -162,6 +162,7 @@ const Example = () => {
 | onRecordStop | `null` | get current sessionId on stop recording
 | onPinClick | `null` | get a pin info on click in normal mode
 | onZoom | `null` | get the current zoom scale value
+| onLoadChange | `load_success, percentage` | load_success: get whether all images have been loaded, percentage: current load percentage
 
 
 ## Ref Functions
