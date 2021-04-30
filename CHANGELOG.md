@@ -1,6 +1,10 @@
 
 # Change Log
 
+## [2.1.0] - 2021-04-30
+### Added
+- Added event onLoadChange
+
 ## [2.0.0] - 2021-03-23
 ### Added
 - Zoom function: zoom in, zoom out the image
