@@ -31,7 +31,8 @@
 		"test:unit": "cross-env CI=1 react-scripts test --env=jsdom",
 		"test:watch": "react-scripts test --env=jsdom",
 		"predeploy": "cd example && yarn install && yarn run build",
-		"deploy": "gh-pages -d example/build"
+		"deploy": "gh-pages -d example/build",
+		"release": "sh scripts/release.sh"
 	},
 	"dependencies": {
 		"animated": "^0.2.2",
@@ -42,8 +43,9 @@
 		"react": "^17.0.2"
 	},
 	"devDependencies": {
+		"@babel/eslint-parser": "^7.16.5",
+		"@babel/preset-react": "^7.16.7",
 		"@testing-library/react": "12.1.2",
-		"babel-eslint": "10.1.0",
 		"babel-plugin-inline-react-svg": "2.0.1",
 		"cross-env": "7.0.3",
 		"eslint": "8.7.0",
@@ -54,8 +56,8 @@
 		"eslint-plugin-node": "11.1.0",
 		"eslint-plugin-prettier": "4.0.0",
 		"eslint-plugin-promise": "6.0.0",
-		"eslint-plugin-react": "7.21.5",
-		"eslint-plugin-react-hooks": "4.2.0",
+		"eslint-plugin-react": "7.28.0",
+		"eslint-plugin-react-hooks": "4.3.0",
 		"eslint-plugin-standard": "5.0.0",
 		"gh-pages": "3.2.3",
 		"microbundle-crl": "0.13.11",

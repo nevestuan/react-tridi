@@ -510,7 +510,10 @@ const Tridi = forwardRef(
 		};
 
 		const onImageLoaded = useCallback(() => {
-			onLoadChange(loadedImagesCount + 1 === _count, Math.round(((loadedImagesCount + 1)/ _count)* 100));
+			onLoadChange(
+				loadedImagesCount + 1 === _count,
+				Math.round(((loadedImagesCount + 1) / _count) * 100)
+			);
 		}, [_count, loadedImagesCount, onLoadChange]);
 
 		useTridiKeyPressHandler({ nextMove, prevMove });
@@ -741,7 +744,7 @@ Tridi.propTypes = {
 	onRecordStart: PropTypes.func,
 	onRecordStop: PropTypes.func,
 	onPinClick: PropTypes.func,
-	onLoadChange: PropTypes.func,
+	onLoadChange: PropTypes.func
 };
 
 Tridi.defaultProps = {
@@ -792,7 +795,7 @@ Tridi.defaultProps = {
 	onRecordStop: () => {},
 	onPinClick: () => {},
 	onZoom: () => {},
-	onLoadChange: () => {},
+	onLoadChange: () => {}
 };
 
 export default Tridi;
