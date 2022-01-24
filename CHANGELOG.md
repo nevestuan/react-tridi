@@ -1,6 +1,10 @@
 
 # Change Log
 
+## [2.1.1] - 2022-01-24
+### Updated
+- Updated version of dependencies in package.json
+
 ## [2.1.0] - 2021-04-30
 ### Added
 - Added event onLoadChange
