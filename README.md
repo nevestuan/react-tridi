@@ -121,7 +121,7 @@ const Example = () => {
 | location | `string` | `undefined` | yes* | Path to images folder. Required if images = "numbered"
 | count | `number` | `undefined` | yes* | Number of images in the series. Required if images = "numbered"
 | draggable | `boolean` | `true` | no | Enable/disable mouse drag event
-| hintOnStartUp | `boolean` | `false` | no | Enable/disable hint on start up
+| hintOnStartup | `boolean` | `false` | no | Enable/disable hint on start up
 | hintText | `string` | `undefined` | no | Enable/disable hint text
 | autoplay | `boolean` | `false` | no | Enable/disable autoplay
 | autoplaySpeed | `number` | `50` | no | Adjust autoplay speed
