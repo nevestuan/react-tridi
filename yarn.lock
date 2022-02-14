@@ -77,7 +77,7 @@
     semver "^6.3.0"
     source-map "^0.5.0"
 
-"@babel/eslint-parser@^7.16.3", "@babel/eslint-parser@^7.16.5":
+"@babel/eslint-parser@7.16.5", "@babel/eslint-parser@^7.16.3":
   version "7.16.5"
   resolved "https://registry.yarnpkg.com/@babel/eslint-parser/-/eslint-parser-7.16.5.tgz#48d3485091d6e36915358e4c0d0b2ebe6da90462"
   integrity sha512-mUqYa46lgWqHKQ33Q6LNCGp/wPR3eqOYTUixHFsfrSQqRxH0+WOzca75iEjFr5RDGH1dDz622LaHhLOzOuQRUA==
@@ -1775,18 +1775,7 @@
     "@babel/types" "^7.4.4"
     esutils "^2.0.2"
 
-"@babel/preset-react@^7.12.5":
-  version "7.12.10"
-  resolved "https://registry.yarnpkg.com/@babel/preset-react/-/preset-react-7.12.10.tgz#4fed65f296cbb0f5fb09de6be8cddc85cc909be9"
-  integrity sha512-vtQNjaHRl4DUpp+t+g4wvTHsLQuye+n0H/wsXIZRn69oz/fvNC7gQ4IK73zGJBaxvHoxElDvnYCthMcT7uzFoQ==
-  dependencies:
-    "@babel/helper-plugin-utils" "^7.10.4"
-    "@babel/plugin-transform-react-display-name" "^7.12.1"
-    "@babel/plugin-transform-react-jsx" "^7.12.10"
-    "@babel/plugin-transform-react-jsx-development" "^7.12.7"
-    "@babel/plugin-transform-react-pure-annotations" "^7.12.1"
-
-"@babel/preset-react@^7.16.0", "@babel/preset-react@^7.16.7":
+"@babel/preset-react@7.16.7", "@babel/preset-react@^7.16.0":
   version "7.16.7"
   resolved "https://registry.yarnpkg.com/@babel/preset-react/-/preset-react-7.16.7.tgz#4c18150491edc69c183ff818f9f2aecbe5d93852"
   integrity sha512-fWpyI8UM/HE6DfPBzD8LnhQ/OcH8AgTaqcqP2nGOXEUV+VKBR5JRN9hCk9ai+zQQ57vtm9oWeXguBCPNUjytgA==
@@ -1797,6 +1786,17 @@
     "@babel/plugin-transform-react-jsx" "^7.16.7"
     "@babel/plugin-transform-react-jsx-development" "^7.16.7"
     "@babel/plugin-transform-react-pure-annotations" "^7.16.7"
+
+"@babel/preset-react@^7.12.5":
+  version "7.12.10"
+  resolved "https://registry.yarnpkg.com/@babel/preset-react/-/preset-react-7.12.10.tgz#4fed65f296cbb0f5fb09de6be8cddc85cc909be9"
+  integrity sha512-vtQNjaHRl4DUpp+t+g4wvTHsLQuye+n0H/wsXIZRn69oz/fvNC7gQ4IK73zGJBaxvHoxElDvnYCthMcT7uzFoQ==
+  dependencies:
+    "@babel/helper-plugin-utils" "^7.10.4"
+    "@babel/plugin-transform-react-display-name" "^7.12.1"
+    "@babel/plugin-transform-react-jsx" "^7.12.10"
+    "@babel/plugin-transform-react-jsx-development" "^7.12.7"
+    "@babel/plugin-transform-react-pure-annotations" "^7.12.1"
 
 "@babel/preset-typescript@^7.16.0":
   version "7.16.7"
